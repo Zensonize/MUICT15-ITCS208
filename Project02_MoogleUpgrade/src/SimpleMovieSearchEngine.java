@@ -126,7 +126,7 @@ public class SimpleMovieSearchEngine implements BaseMovieSearchEngine {
 
 					userdata.put(uid, new User(uid,uname,pwd));
 				}
-				
+			inputFS.close();
 			}
 		}catch (IOException e) {
 			e.printStackTrace();
@@ -308,6 +308,7 @@ public class SimpleMovieSearchEngine implements BaseMovieSearchEngine {
 		Collections.sort(unsortedMovies, new CustomSort());
 		return unsortedMovies;
 	}
+	
 	private Movie readMovieData(String stream) {
 		String regx1 = "(\\d+),\"(.+) [(](\\d{4})[)]\",(.+)";
 		String regx2 = "(\\d+),(.+) [(](\\d{4})[)],(.+)";
