@@ -199,12 +199,7 @@ public class MoogleSystem {
 		System.out.println("\t-----------------------------------\n");
 		System.out.println("\n\t[0] Change Username\n\t[1] Change Password\n\n\t[E] Back\n");
 		Scanner in = new Scanner(System.in);
-		switch(in.next().charAt(0)) {
-			case '0': while(SetName(me)); return true;
-			case '1': while(SetPassword(me)); return true;
-			case 'E': return false;	
-			default : return true;
-		}
+		return false;
 	}
 	
 	private List<Movie> SearchCompiler(String request){

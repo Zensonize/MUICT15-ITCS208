@@ -13,7 +13,7 @@ public class MoogleIOController {
 			System.out.print(toEnter);
 			char stream = in.next().charAt(0);
 			if((int) stream >= (int) minChar && (int) stream <= (int) maxChar) 	return stream;
-			else if(stream == 'E' || stream == 'e') 							return stream;
+			else if(stream == 'E' || stream == 'e') 							return 'E';
 			else System.out.println("Wrong input\n");
 		}
 	}
