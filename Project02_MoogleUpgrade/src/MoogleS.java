@@ -156,15 +156,21 @@ public class MoogleS {
 		System.out.println("Welcome to Moogle");
 		System.out.println("=============================\n");
 		System.out.println("\t[0] Register\n\t[1] Login\n\t[2] Skip Login and Use Moogle Search Engine\n\n\t[E] Exit\n");
-		System.out.print("\nYour Choice: ");
 		switch(MoogleIOController.readChar('0', '2')) {
-			case '0':	MoogleRegister.register(this);				break;
-			case '1': 	MoogleLogin.login(this);					break;
-			case '2': 	MoogleSearchEngine.searchEngine(this);		break;
+			case '0':	MoogleRegister.register(this);			start();		break;
+			case '1': 	MoogleLogin.login(this);				start();		break;
+			case '2': 	MoogleSearchEngine.searchEngine(this);	start();		break;
 			case 'E': 	break;
 			case 'e':	break;
 			default: start();
 		}
 	}
 	
+	public Map<Integer, Movie> getMovies(){
+		return movies;
+	}
+	
+	public Map<Integer, User> getUser(){
+		return users;
+	}
 }
