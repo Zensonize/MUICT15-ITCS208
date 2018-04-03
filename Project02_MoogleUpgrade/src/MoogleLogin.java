@@ -13,8 +13,12 @@ public class MoogleLogin {
 		
 		if(system.getUser().containsKey(userID)) {
 			if(system.getUser().get(userID).getPassword().equals(password)) {
-				MoogleUser.start(system, system.getUser().get(userID));
+				MoogleHome.start(system, system.getUser().get(userID));
+			}
+			else if(system.getUser().get(userID).getPassword().equals("-") && password.equals(MoogleIOController.MD5("root"))) {
+				MoogleHome.start(system, system.getUser().get(userID));
 			}
 		}
+		else System.out.println("Wrong UserID or Password");
 	}
 }
