@@ -73,4 +73,12 @@ public class MoogleIOController {
 		
 		return null;
 	}
+	
+	public static void blankSpace() {
+		System.out.println("\n\n\n\n\n");
+	}
+	
+	public static void headerLine() {
+		System.out.println("=============================\n");
+	}
 }
