@@ -2,7 +2,6 @@
 public class MoogleRegister {
 	
 	public static void register(MoogleS system) {
-		System.out.println("Register!");
 		int userID;
 		String password,confirmPassword;
 		
@@ -16,11 +15,12 @@ public class MoogleRegister {
 		
 		if(password.equals(confirmPassword)) {
 			if(!system.getUser().containsKey(userID)) {
-				system.getUser().put(userID, new User(userID,password));
+				system.getUser().put(userID, new User(userID,MoogleIOController.MD5(password)));
 			}
 		}
 		else {
 			System.out.println("Wrong Password");
 		}
 	}
+	
 }
