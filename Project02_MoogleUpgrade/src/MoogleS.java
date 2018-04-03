@@ -2,10 +2,13 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -13,14 +16,22 @@ import java.util.regex.Pattern;
 
 public class MoogleS {
 	
-	public Map<Integer, Movie> movies;
-	public Map<Integer, User> users;
+	public static Map<Integer, Movie> movies;
+	public static Map<Integer, User> users;
 	String movieFile,ratingFile,userFile;
 	int numRating = 0;
 	
 	public MoogleS() {
 		movies = new HashMap<Integer, Movie>();
 		users  = new HashMap<Integer,User>();
+	}
+	
+	public Map<Integer, Movie> getMovies(){
+		return movies;
+	}
+	
+	public Map<Integer, User> getUser(){
+		return users;
 	}
 	
 	public boolean loadData(String movieFile, String ratingFile, String userFile){
@@ -166,11 +177,85 @@ public class MoogleS {
 		}
 	}
 	
-	public Map<Integer, Movie> getMovies(){
-		return movies;
+	public void updateFile() {
+		updateMovies();
+		updateUsers();
+		updateRatings();
 	}
 	
-	public Map<Integer, User> getUser(){
-		return users;
+	private static void updateMovies() {
+		try {
+			PrintWriter pw  = new PrintWriter(new File("output\\movies.csv"));
+	        
+	        
+	        pw.println("movieId,title,genres\n");
+	        
+	        for(Integer key : movies.keySet()) {
+	        	StringBuilder movieOut = new StringBuilder();
+	        	movieOut.append(key + ",");
+	        	movieOut.append(movies.get(key).getTitle() + " (" + movies.get(key).getYear() + "),");
+	        	Iterator<String> it = movies.get(key).getTags().iterator();
+	            while(it.hasNext()){
+	               movieOut.append(it.next() + "|");
+	            }
+	            
+	            pw.println(movieOut.toString() + '\n');
+	        }
+	       
+	        pw.close();
+	        
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void updateUsers() {
+		
+		try {
+			PrintWriter pw = new PrintWriter(new File("output\\users.csv"));
+			
+	        
+	        pw.println("uid,uname,pwd");												//add header of csv file
+	        
+	        for(Integer key: users.keySet()) {
+	        	StringBuilder userOut = new StringBuilder();
+	        	userOut.append(key + ",");
+	        	if(users.get(key).getName()== null) userOut.append("-,");
+	        	else userOut.append(users.get(key).getName()+",");
+	        	if(users.get(key).getPassword() == null) userOut.append("-\n");
+	        	else userOut.append(users.get(key).getPassword() + "\n");
+	        	
+	        	pw.println(userOut.toString());
+	        }
+	    
+	        pw.close();
+	        
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private static void updateRatings() {
+		
+		try {			
+			PrintWriter pw = new PrintWriter(new File("output\\ratings.csv"));
+	        
+	        pw.println("userId,movieId,rating,timestamp");
+	        
+	        for(Integer key : movies.keySet()) {
+	        	for(Integer key2 : movies.get(key).getRating().keySet()) {
+	        		StringBuilder ratingOut = new StringBuilder();
+	             	ratingOut.append(key2 + "," + movies.get(key).getRating().get(key2).getAll() + "\n");
+	             	pw.println(ratingOut.toString());
+	             }
+	        }
+	        
+	        pw.close();
+	        
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}     
+        
 	}
 }

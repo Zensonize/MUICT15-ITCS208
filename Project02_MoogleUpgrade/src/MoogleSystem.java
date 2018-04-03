@@ -545,45 +545,11 @@ public class MoogleSystem {
 	}
 
 	public void UpdateFile() throws FileNotFoundException {	
-		PrintWriter pw = new PrintWriter(new File("output\\users.csv"));
-        StringBuilder userOut = new StringBuilder();
-        userOut.append("uid,uname,pwd\n");												//add header of csv file
-        for(Integer key: users.keySet()) {
-        	userOut.append(key + ",");
-        	if(users.get(key).getName()== null) userOut.append("-,");
-        	else userOut.append(users.get(key).getName()+",");
-        	if(users.get(key).getPassword() == null) userOut.append("-\n");
-        	else userOut.append(users.get(key).getPassword() + "\n");
-        }
+		
         
-        pw.write(userOut.toString());
-        pw.close();
         
-        pw = new PrintWriter(new File("output\\movies.csv"));
-        StringBuilder movieOut = new StringBuilder();
-        movieOut.append("movieId,title,genres\n");
-        for(Integer key : movies.keySet()) {
-        	movieOut.append(key + ",");
-        	movieOut.append(movies.get(key).getTitle() + " (" + movies.get(key).getYear() + "),");
-        	Iterator<String> it = movies.get(key).getTags().iterator();
-            while(it.hasNext()){
-               movieOut.append(it.next() + "|");
-            }
-            movieOut.append("\n");
-        }
         
-        pw.write(movieOut.toString());
-        pw.close();
         
-        pw = new PrintWriter(new File("output\\ratings.csv"));
-        StringBuilder ratingOut = new StringBuilder();
-        ratingOut.append("userId,movieId,rating,timestamp\n");
-        for(Integer key : movies.keySet()) {
-        	ratingOut.append(movies.get(key).getStringRating());
-        }
-        
-        pw.write(ratingOut.toString());
-        pw.close();
 	}
 
 	//------------------ Miscellaneous ----------------------

@@ -80,12 +80,4 @@ public class Movie {
 		return ratings;
 	}
 	
-	public String getStringRating() {
-		StringBuilder ratingOut = new StringBuilder();
-		for(Integer key : ratings.keySet()) {
-         	ratingOut.append(key + "," + ratings.get(key).getAll() + "\n");
-         }
-		return ratingOut.toString();
-	}
-	
 }

@@ -13,6 +13,7 @@ public class Moogle {
 		MoogleS program = new MoogleS();
 		if(program.loadData(movieFile, ratingFile, userFile)) {
 			program.start();
+			program.updateFile();
 		}
 	}
 
