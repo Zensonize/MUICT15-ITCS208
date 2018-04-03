@@ -160,7 +160,7 @@ public class MoogleS {
 		switch(MoogleIOController.readChar('0', '2',"Your Choie: ")) {
 			case '0':	MoogleRegister.register(this);			start();		break;
 			case '1': 	MoogleLogin.login(this);				start();		break;
-			case '2': 	MoogleSearchEngine.searchEngine(this);	start();		break;
+			case '2': 	MoogleSearchEngine.start(this, null);	start();		break;
 			case 'E': 	break;
 			case 'e':	break;
 			default: start();

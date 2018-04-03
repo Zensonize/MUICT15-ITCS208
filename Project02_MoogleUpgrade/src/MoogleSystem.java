@@ -107,7 +107,7 @@ public class MoogleSystem {
 	}
 	
 	private boolean Home (User me) {
-		if(me.getName() != null) System.out.println("Edit Account " + users.get(me.getID()).getName());
+		if(me.getName() != null) System.out.println("Welcome to Moogle " + users.get(me.getID()).getName());
 		else System.out.println("Welcome to Moogle " + me.getID());
 		System.out.println("=============================\n");
 		System.out.println("\t[0] Search Engine\n\t[1] Edit my Account\n\n\t[E] Log Out\n");

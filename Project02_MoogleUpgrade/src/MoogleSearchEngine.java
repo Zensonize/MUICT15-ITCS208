@@ -1,6 +1,8 @@
 
 public class MoogleSearchEngine {
-	public static void searchEngine(MoogleS system) {
+	
+	public static void start(MoogleS system, User me) {
 		System.out.println("Search me!");
 	}
+	
 }
