@@ -16,6 +16,7 @@ public class MoogleS {
 	public Map<Integer, Movie> movies;
 	public Map<Integer, User> users;
 	String movieFile,ratingFile,userFile;
+	int numRating = 0;
 	
 	public MoogleS() {
 		movies = new HashMap<Integer, Movie>();
@@ -29,6 +30,7 @@ public class MoogleS {
 			if(user.exists()) users = loadUsers(user);
 			loadRating(ratingFile);
 			System.out.println("Loaded " + movies.size() + " movies");
+			System.out.println("Loaded " + numRating + " ratings");
 			System.out.println("Loaded " + users.size() + " users");
 			System.out.println("=========================================\n");
 			return true;
@@ -61,7 +63,6 @@ public class MoogleS {
 					loadedData.put(mid, new Movie(mid,title,year));
 					
 					for(String key: tags) {
-						System.out.println(key);
 						loadedData.get(mid).addTag(key);
 					}
 				}
@@ -108,6 +109,46 @@ public class MoogleS {
 	}
 	
 	public void loadRating(String ratingFile) {
+		
+		try {
+			File ratingData = new File(ratingFile);
+			InputStream reader = new FileInputStream(ratingData);
+			BufferedReader read = new BufferedReader(new InputStreamReader(reader));
+			String stream = "";
+			
+			while((stream = read.readLine()) != null) {
+				
+				String regex = "(\\d+),(\\d+),(\\d+.\\d+),(\\d+)";
+				Pattern p = Pattern.compile(regex);
+				Matcher m = p.matcher(stream);
+				
+				if(m.find()) {
+					
+					int uid = Integer.parseInt(m.group(1));								// -|
+					int movKey = Integer.parseInt(m.group(2));							//  |
+					double rating = Double.parseDouble(m.group(3));						//	| Applying RegEx
+					long timestamp = Long.parseLong(m.group(4));						// -|
+					
+					if(!users.containsKey(uid)) {										// -|
+						users.put(uid, new User(uid));									//  | Create a user List to prevent user duplication
+					}																	// -|
+					
+					if(movies.containsKey(movKey)) {
+						if(movies.get(movKey).getRating().containsKey(uid)) {
+							if(movies.get(movKey).getRating().get(uid).timestamp < timestamp) movies.get(movKey).getRating().replace(uid, new Rating(users.get(uid),movies.get(movKey),rating,timestamp)); 
+						}
+						else {
+							movies.get(movKey).addRating(users.get(uid), movies.get(movKey), rating, timestamp);
+							numRating++;
+						}
+					}
+				}
+			}
+			
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 	}
 	

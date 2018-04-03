@@ -87,7 +87,10 @@ public class SimpleMovieSearchEngine implements BaseMovieSearchEngine {
 					}																	// -|
 					
 					if(movies.containsKey(movKey)) {
-						movies.get(movKey).addRating(users.get(uid), movies.get(movKey), rating, timestamp);
+						if(movies.get(movKey).getRating().containsKey(uid)) {
+							if(movies.get(movKey).getRating().get(uid).timestamp < timestamp) movies.get(movKey).getRating().replace(uid, new Rating(users.get(uid),movies.get(movKey),rating,timestamp)); 
+						}
+						else movies.get(movKey).addRating(users.get(uid), movies.get(movKey), rating, timestamp);
 					}
 					else System.out.println("No movies");
 				}
