@@ -66,6 +66,7 @@ public class MoogleS {
 					}
 				}
 			}
+			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -75,6 +76,33 @@ public class MoogleS {
 	
 	public Map<Integer, User> loadUsers(File userFile){
 		Map<Integer, User> loadedData = new HashMap<Integer, User>();
+		
+		try {
+			File userData = userFile;
+			InputStream reader = new FileInputStream(userData);
+			BufferedReader read = new BufferedReader(new InputStreamReader(reader));
+			String stream = "";
+			
+			while((stream = read.readLine()) != null) {
+				String regex = "(\\d+),(.+),(.+)";
+				
+				Pattern p = Pattern.compile(regex);
+				Matcher m = p.matcher(stream);
+				
+				if(m.find()) {
+					int uid = Integer.parseInt(m.group(1));								// -|
+					String uname = m.group(2);											//  | Applying RegEx
+					String pwd = m.group(3);											// -|
+					
+					loadedData.put(uid, new User(uid,uname,pwd));
+					
+				}
+			}
+			
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		return loadedData;
 	}
