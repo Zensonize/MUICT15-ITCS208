@@ -153,10 +153,11 @@ public class MoogleS {
 	}
 	
 	public void start() {
+		System.out.println("\n\n\n\n\n");
 		System.out.println("Welcome to Moogle");
 		System.out.println("=============================\n");
 		System.out.println("\t[0] Register\n\t[1] Login\n\t[2] Skip Login and Use Moogle Search Engine\n\n\t[E] Exit\n");
-		switch(MoogleIOController.readChar('0', '2')) {
+		switch(MoogleIOController.readChar('0', '2',"Your Choie: ")) {
 			case '0':	MoogleRegister.register(this);			start();		break;
 			case '1': 	MoogleLogin.login(this);				start();		break;
 			case '2': 	MoogleSearchEngine.searchEngine(this);	start();		break;
