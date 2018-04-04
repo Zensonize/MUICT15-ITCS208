@@ -82,7 +82,7 @@ public class MoogleSearchEngine {
 			prased = prased.trim();																//-| remove white in the back if typed "The  -"
 		}
 		else{
-			System.out.println("Wrong title regx");
+			System.out.println("No title");
 			return null;
 		}
 		
@@ -103,6 +103,31 @@ public class MoogleSearchEngine {
 	
 	private static String[][] compileTags(String request){
 		String[][] prased = new String[5][5];
+		String[] includeTags; 
+		String[] excludeTags;
+		
+		String regx_include = "-t.+/i ([\\S]+)";
+		String regx_exclude = "-t.+/x ([\\S]+)";
+		
+		Pattern p = Pattern.compile(regx_include);														//-|
+		Matcher m = p.matcher(request);																	// |
+		if(m.find()) {																					// | Compile Included tags
+			includeTags = m.group(1).split(",");														//-|
+			for(int i = 0; i<includeTags.length;i++) {
+				prased[0][i] = includeTags[i];
+			}
+		}
+		else System.out.println("no Include");
+		
+		p = Pattern.compile(regx_exclude);														//-|
+		m = p.matcher(request);																	// |
+		if(m.find()) {																			// | Compile Excluded tags
+			excludeTags = m.group(1).split(",");												// |
+			for(int i = 0; i<excludeTags.length;i++) {
+				prased[1][i] = excludeTags[i];
+			}
+		}
+		else System.out.println("no Exclude");
 		
 		return prased;
 	}
