@@ -299,15 +299,53 @@ public class MoogleSearchEngine {
 	}
 	
 	private static List<Movie> searchByYear_Lessthan(MoogleS system,int lessthan){
-		return null;
+		List<Movie> results = new ArrayList<Movie>();
+		
+		for(int i = 1000;i<=lessthan;i++) {
+			List<Movie> subResult = searchByYear_Exact(system, i);
+			for(Movie a:subResult) {
+				if(!results.contains(a)) results.add(a);
+			}
+		}
+		
+		return results;
 	}
 	
 	private static List<Movie> searchByYear_Morethan(MoogleS system,int morethan){
-		return null;
+		List<Movie> results = new ArrayList<Movie>();
+		
+		for(int i = morethan;i<=2018;i++) {
+			List<Movie> subResult = searchByYear_Exact(system, i);
+			for(Movie a:subResult) {
+				if(!results.contains(a)) results.add(a);
+			}
+		}
+		
+		return results;
 	}
 	
-	private static List<Movie> searchByYear_Between(MoogleS system,int a, int b){
-		return null;
+	private static List<Movie> searchByYear_Between(MoogleS system,int y1, int y2){
+		int from,to;
+		if(y1>y2) {
+			from = y2;
+			to  = y1;
+		}
+		else {
+			from = y1;
+			to = y2;
+		}
+		
+		List<Movie> results = new ArrayList<Movie>();
+		
+		for(int i = from;i<=to;i++) {
+			List<Movie> subResult = searchByYear_Exact(system, i);
+			
+			for(Movie a:subResult) {
+				if(!results.contains(a)) results.add(a);
+			}
+		}
+		
+		return results;
 	}
 	
 	private static List<Movie> searchByRating(MoogleS system,double[] rating){
@@ -323,19 +361,65 @@ public class MoogleSearchEngine {
 	}
 	
 	private static List<Movie> searchByRating_Exact(MoogleS system,double rating){
-		return null;
+		List<Movie> results = new ArrayList<Movie>();
+		int exactRating = (int) (rating*10)%100;
+		for(Integer key: system.getMovies().keySet()) {
+			if(system.getMovies().get(key).getExactRating() == exactRating) {
+				results.add(system.getMovies().get(key));
+			}
+		}
+		
+		return results;
 	}
 	
 	private static List<Movie> searchByRating_Lessthan(MoogleS system,double lessthan){
-		return null;
+		List<Movie> results = new ArrayList<Movie>();
+		int exactRating = (int) (lessthan*10)%100;
+		for(int i=1;i<=exactRating;i++) {
+			for(Integer key: system.getMovies().keySet()) {
+				if(system.getMovies().get(key).getExactRating() == i) {
+					results.add(system.getMovies().get(key));
+				}
+			}
+		}
+		
+		return results;
 	}
 	
 	private static List<Movie> searchByRating_Morethan(MoogleS system,double morethan){
-		return null;
+		List<Movie> results = new ArrayList<Movie>();
+		int exactRating = (int) (morethan*10)%100;
+		for(int i=exactRating;i<=99;i++) {
+			for(Integer key: system.getMovies().keySet()) {
+				if(system.getMovies().get(key).getExactRating() == i) {
+					results.add(system.getMovies().get(key));
+				}
+			}
+		}
+		
+		return results;
 	}
 	
 	private static List<Movie> searchByRating_Between(MoogleS system,double a, double b){
-		return null;
+		List<Movie> results = new ArrayList<Movie>();
+		int lower,upper;
+		if(a>b) {
+			lower = (int) (b*10)%100;
+			upper = (int) (a*10)%100;
+		}
+		else {
+			lower = (int) (a*10)%100;
+			upper = (int) (b*10)%100;
+		}
+		for(int i=lower;i<=upper;i++) {
+			for(Integer key: system.getMovies().keySet()) {
+				if(system.getMovies().get(key).getExactRating() == i) {
+					results.add(system.getMovies().get(key));
+				}
+			}
+		}
+		
+		return results;
 	}
 	
 	//Elimination

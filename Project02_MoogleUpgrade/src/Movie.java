@@ -68,6 +68,10 @@ public class Movie {
 		return avgRating;
 	}
 	
+	public int getExactRating() {
+		return (int) (avgRating*10)%100;
+	}
+	
 	public void addRating(User user, Movie movie, double rating, long timestamp) {
 		if(this.ratings.containsKey(user.getID())) {
 			
