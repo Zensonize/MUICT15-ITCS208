@@ -35,6 +35,7 @@ public class MoogleIOController {
 		}
 		
 	}
+	
 	public static String readString(String toEnter) {
 	
 		while(true) {
@@ -44,9 +45,21 @@ public class MoogleIOController {
 			if(!stream.isEmpty()) return stream;	
 		}
 	}
+	
+	public static String readLine(String toEnter) {
+		while(true) {
+			Scanner in = new Scanner(System.in);
+			System.out.print(toEnter);
+			String stream = in.nextLine();
+			if(!stream.isEmpty()) return stream;	
+		}
+	}
+	
 	public static String readFileSource(String Requirement) {
 		return "";
 	}
+	
+	
 	
 	public static void wait(int duration) {
 		try {
