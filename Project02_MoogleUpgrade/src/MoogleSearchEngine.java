@@ -19,12 +19,13 @@ public class MoogleSearchEngine {
 		
 		String request = MoogleIOController.readLine("Search: ");
 		if(!(request.toUpperCase().charAt(0) == 'E')) {
+			
 			results = searchCompiler(system,request);
-			
 			int index = 0;
-			
-			for(ListIterator<Movie> a = results.listIterator();a.hasNext();index++) {
-				System.out.println("[" + index + "]  " + a.next());
+			if(!results.isEmpty()) {
+				for(ListIterator<Movie> a = results.listIterator();a.hasNext();index++) {
+					System.out.println("[" + index + "]  " + a.next());
+				}
 			}
 			
 			switch(MoogleIOController.readChar('0', '1', "Your Choice: ")) {
@@ -91,6 +92,33 @@ public class MoogleSearchEngine {
 	
 	private static int[] compileYear(String request) {
 		int[] prased = {-1,0,0};
+		String regx_year = "-y ([<>|=]) (\\d{4})";
+		String regx_year2 = "-y.+\\d,(\\d{4})";
+		char type = 'n';
+		
+		Pattern p = Pattern.compile(regx_year);													//-|
+		Matcher m = p.matcher(request);															// | Compile Year														
+		if(m.find()) {																			// |
+			type = m.group(1).charAt(0);														//-|
+			prased[1] = Integer.parseInt(m.group(2));
+		}
+		else return null;
+		
+		switch(type) {
+			case '=': prased[0] = 0;	break;
+			case '<': prased[0] = 1;	break;
+			case '>': prased[0] = 2;	break;
+			case '|': prased[0] = 3;	
+					  p = Pattern.compile(regx_year2);
+					  m = p.matcher(request);
+					  if(m.find()) {
+						  prased[2] = Integer.parseInt(m.group(1));
+					  }
+					  break;
+		}
+		
+		System.out.println(prased[0] + " " + prased[1] + " " + prased[2]);
+		
 		
 		return prased;
 	}
@@ -211,6 +239,7 @@ public class MoogleSearchEngine {
 			case 2: results = searchByYear_Morethan(system, year[1]);			break;
 			case 3: results = searchByYear_Between(system, year[1], year[2]);	break;
 		}
+		
 		return results;
 	}
 	
