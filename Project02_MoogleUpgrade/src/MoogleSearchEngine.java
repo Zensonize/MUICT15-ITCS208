@@ -29,11 +29,11 @@ public class MoogleSearchEngine {
 			}
 			
 			switch(MoogleIOController.readChar('0', '1', "Your Choice: ")) {
+				case '0':	start(system,me);	break;	
 				case 'E':						break;
 				default: 	start(system,me);	break;
 			}
 		}
-		
 		
 	}
 	
@@ -119,12 +119,37 @@ public class MoogleSearchEngine {
 		
 		System.out.println(prased[0] + " " + prased[1] + " " + prased[2]);
 		
-		
 		return prased;
 	}
 	
 	private static double[] compileRatings(String request) {
 		double[] prased = {0.0,0.0,0.0};
+		String regx_rating = "-r ([<>|=]) (\\d+(\\.\\d+)?)";
+		String regx_rating2 = "-r.+\\d,(\\d+(\\.\\d+)?)";
+		char type = 'n';
+		
+		Pattern p = Pattern.compile(regx_rating);												//-|
+		Matcher m = p.matcher(request);															// | Compile Year														
+		if(m.find()) {																			// |
+			type = m.group(1).charAt(0);														//-|
+			prased[1] = Double.parseDouble(m.group(2));
+		}
+		else return null;
+		
+		switch(type) {
+			case '=': prased[0] = 0;	break;
+			case '<': prased[0] = 1;	break;
+			case '>': prased[0] = 2;	break;
+			case '|': prased[0] = 3;	
+					  p = Pattern.compile(regx_rating2);
+					  m = p.matcher(request);
+					  if(m.find()) {
+						  prased[2] = Double.parseDouble(m.group(1));
+					  }
+					  break;
+		}
+		
+		System.out.println(prased[0] + " " + prased[1] + " " + prased[2]);
 		
 		return prased;
 	}
