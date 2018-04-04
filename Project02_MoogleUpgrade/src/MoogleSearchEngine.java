@@ -193,16 +193,30 @@ public class MoogleSearchEngine {
 			
 			if(year != null) {
 				results = eliminateByYear(results, year);
-				
+			}
+			if(tags != null) {
+				results = eliminateByTags(results, tags);
+			}
+			if(ratings != null) {
+				results = eliminateByRating(results, ratings);
 			}
 		}
 		
 		else if(year != null) {
 			results = searchByYear(system, year);
+			if(tags != null) {
+				results = eliminateByTags(results, tags);
+			}
+			if(ratings != null) {
+				results = eliminateByRating(results, ratings);
+			}
 		}
 		
 		else if(tags != null) {
 			results = searchByTags(system, tags);
+			if(ratings != null) {
+				results = eliminateByRating(results, ratings);
+			}
 		}
 		
 		else if(ratings != null) {
@@ -222,10 +236,11 @@ public class MoogleSearchEngine {
 	
 	private static List<Movie> searchByTags(MoogleS system,String[][] tags){
 		List<Movie> results = new ArrayList<Movie>();
+		System.out.println(tags[0].length);
 		
-		if(tags[0].length != 0) {
+		if(tags[0][0] != null) {
 			
-			for(int includeTags = 0;includeTags<tags[0].length;includeTags++) {
+			for(int includeTags = 0;tags[0][includeTags] != null;includeTags++) {
 				
 				for(Integer key: system.getMovies().keySet()) {
 					
@@ -236,14 +251,17 @@ public class MoogleSearchEngine {
 					}
 				}	
 			}
+			
+			if(tags[1][0] != null) results = eliminateByTags(results, tags);
 		}
+		
 		else {
 			
-			for(int excludeTags = 0;excludeTags<tags[1].length;excludeTags++) {
+			for(int excludeTags = 0;tags[1][excludeTags] != null;excludeTags++) {
 				
 				for(Integer key: system.getMovies().keySet()) {
 					
-					if(!system.getMovies().get(key).getTags().contains(tags[0][excludeTags])) {
+					if(!(system.getMovies().get(key).getTags().contains(tags[1][excludeTags]))) {
 						
 						if(!results.contains(system.getMovies().get(key))) results.add(system.getMovies().get(key));
 					
@@ -375,5 +393,34 @@ public class MoogleSearchEngine {
 	
 	private static List<Movie> eliminateByRating_Between(List<Movie> toFilter,double a, double b){
 		return null;
+	}
+	
+	private static List<Movie> eliminateByTags(List<Movie> toFilter, String[][] tags){
+		List<Movie> toReturn = toFilter;
+		
+		if(tags[0][0] != null) {
+			for(int include = 0; tags[0][include] != null;include++) {
+				for(ListIterator<Movie> a = toFilter.listIterator();a.hasNext();) {
+					Movie chk = a.next();
+					if(!chk.getTags().contains(tags[0][include])) {
+						if(toReturn.contains(chk)) toReturn.remove(chk);
+					}
+				}
+			}
+		}
+		
+		if(tags[1][0] != null) {
+			for(int exclude = 0; tags[1][exclude] != null;exclude++) {
+				List<Movie> toRemove = new ArrayList<Movie>();
+				for(Movie a:toReturn) {
+					if(a.getTags().contains(tags[1][exclude])) {
+						toRemove.add(a);
+					}
+				}
+				toReturn.removeAll(toRemove);
+			}
+		}
+		
+		return toReturn;
 	}
 }
