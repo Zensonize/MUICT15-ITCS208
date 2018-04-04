@@ -182,6 +182,7 @@ public class MoogleSearchEngine {
 		}
 		else System.out.println("no Exclude");
 		
+		if(prased[0][0] == null && prased[1][0] == null) return null;
 		return prased;
 	}
 	
@@ -357,6 +358,7 @@ public class MoogleSearchEngine {
 			case 2: results = searchByRating_Morethan(system, rating[1]);			break;
 			case 3: results = searchByRating_Between(system, rating[1], rating[2]);	break;
 		}
+		
 		return results;
 	}
 	
@@ -436,19 +438,58 @@ public class MoogleSearchEngine {
 	}
 	
 	private static List<Movie> eliminateByYear_Exact(List<Movie> toFilter,int year){
-		return null;
+		List<Movie> toReturn = toFilter;
+		List<Movie> toRemove = new ArrayList<Movie>();
+		for(Movie a:toReturn) {
+			if(a.getYear() == year) toRemove.add(a);
+		}
+		toReturn.removeAll(toRemove);
+		
+		return toReturn;
 	}
 	
 	private static List<Movie> eliminateByYear_Lessthan(List<Movie> toFilter,int lessthan){
-		return null;
+		List<Movie> toReturn = toFilter;
+		List<Movie> toRemove = new ArrayList<Movie>();
+		for(Movie a:toReturn) {
+			if(a.getYear() > lessthan) toRemove.add(a);
+		}
+		toReturn.removeAll(toRemove);
+		
+		return toReturn;
 	}
 	
 	private static List<Movie> eliminateByYear_Morethan(List<Movie> toFilter,int morethan){
-		return null;
+		List<Movie> toReturn = toFilter;
+		List<Movie> toRemove = new ArrayList<Movie>();
+		for(Movie a:toReturn) {
+			if(a.getYear() < morethan) toRemove.add(a);
+		}
+		toReturn.removeAll(toRemove);
+		
+		return toReturn;
 	}
 	
-	private static List<Movie> eliminateByYear_Between(List<Movie> toFilter,int a, int b){
-		return null;
+	private static List<Movie> eliminateByYear_Between(List<Movie> toFilter,int y1, int y2){
+		List<Movie> toReturn = toFilter;
+		List<Movie> toRemove = new ArrayList<Movie>();
+		
+		int lowerBound,upperBound;
+		if(y1>y2) {
+			lowerBound = y2;
+			upperBound = y1;
+		}
+		else {
+			lowerBound = y1;
+			upperBound = y2;
+		}
+		
+		for(Movie a:toReturn) {
+			if(!(a.getYear() > lowerBound && a.getYear() < upperBound)) toRemove.add(a);
+		}
+		toReturn.removeAll(toRemove);
+		
+		return toReturn;
 	}
 	
 	private static List<Movie> eliminateByRating(List<Movie> toFilter,double[] rating){
