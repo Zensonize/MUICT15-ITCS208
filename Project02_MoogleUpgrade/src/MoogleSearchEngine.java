@@ -257,17 +257,15 @@ public class MoogleSearchEngine {
 		}
 		
 		else {
-			
-			for(int excludeTags = 0;tags[1][excludeTags] != null;excludeTags++) {
-				
-				for(Integer key: system.getMovies().keySet()) {
-					
-					if(!(system.getMovies().get(key).getTags().contains(tags[1][excludeTags]))) {
-						
-						if(!results.contains(system.getMovies().get(key))) results.add(system.getMovies().get(key));
-					
+			System.out.println("exclude search ");
+			for(Integer key: system.getMovies().keySet()) {
+				Boolean isValid = true;
+				for(int excludeTags = 0;tags[1][excludeTags] != null;excludeTags++) {				
+					if(system.getMovies().get(key).getTags().contains(tags[1][excludeTags])) {
+						isValid = false;
 					}
-				}	
+				}
+				if(isValid) results.add(system.getMovies().get(key));
 			}
 		}
 		
@@ -474,18 +472,8 @@ public class MoogleSearchEngine {
 		List<Movie> toReturn = toFilter;
 		List<Movie> toRemove = new ArrayList<Movie>();
 		
-		int lowerBound,upperBound;
-		if(y1>y2) {
-			lowerBound = y2;
-			upperBound = y1;
-		}
-		else {
-			lowerBound = y1;
-			upperBound = y2;
-		}
-		
 		for(Movie a:toReturn) {
-			if(!(a.getYear() > lowerBound && a.getYear() < upperBound)) toRemove.add(a);
+			if(!(a.getYear() > Math.min(y1, y2) && a.getYear() < Math.max(y1, y2))) toRemove.add(a);
 		}
 		toReturn.removeAll(toRemove);
 		
@@ -559,12 +547,13 @@ public class MoogleSearchEngine {
 		//change from and to or >> move include array inside movie loop
 		if(tags[0][0] != null) {
 			List<Movie> toRemove = new ArrayList<Movie>();
-			for(int include = 0; tags[0][include] != null;include++) {
-				for(Movie chk:toReturn) {
-					if(!chk.getTags().contains(tags[0][include])) {
-						if(toReturn.contains(chk)) toRemove.add(chk);
-					}
+			
+			for(Movie chk:toReturn) {
+				boolean mustRemove = true;
+				for(int include = 0;tags[0][include] != null;include++) {
+					if(chk.getTags().contains(tags[0][include])) mustRemove = false;
 				}
+				if(mustRemove) toRemove.add(chk);
 			}
 			toReturn.removeAll(toRemove);
 		}
