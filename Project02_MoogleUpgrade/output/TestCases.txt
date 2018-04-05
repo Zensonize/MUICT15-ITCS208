@@ -1,0 +1,334 @@
+Search Test
+-m the
+
+-m the -y = 2012                                                //OK
+-m the -y < 2012                                                //OK
+-m the -y > 2012                                                //OK
+-m the -y | 2010,2012                                           //OK
+-m the -y | 2012,2010                                           //OK
+
+-m the -t /i Comedy,Drama                                       //OK
+-m the -t /x Comedy,Drama                                       //OK
+-m the -t /i Comedy /x Drama                                    //OK
+-m the -t /x Comedy /i Drama                                    //OK
+
+-m the -r = 4.5                                                 //OK
+-m the -r < 4.5                                                 //OK
+-m the -r > 4.5                                                 //OK         
+-m the -r | 4.0,4.5                                             //OK
+
+-m the -y = 2012 -t /i Comedy,Drama                             
+-m the -y = 2012 -t /x Comedy,Drama                              
+-m the -y = 2012 -t /i Comedy /x Drama                          
+-m the -y = 2012 -t /x Comedy /i Drama                          
+
+-m the -y = 2012 -r = 4.5                                                            
+-m the -y = 2012 -r < 2.5                                       
+-m the -y = 2012 -r > 4.5                                       
+-m the -y = 2012 -r | 4.0,4.5                                   
+
+-m the -y < 2012 -t /i Comedy,Drama                             //OK
+-m the -y < 2012 -t /x Comedy,Drama                             //OK 
+-m the -y < 2012 -t /i Comedy /x Drama                          //OK
+-m the -y < 2012 -t /x Comedy /i Drama                          //OK
+
+-m the -y < 2012 -r = 4.5                                       //OK                     
+-m the -y < 2012 -r < 2.5                                       //OK
+-m the -y < 2012 -r > 4.5                                       //OK
+-m the -y < 2012 -r | 4.0,4.5                                   //OK
+
+-m the -y > 2012 -t /i Comedy,Drama                     
+-m the -y > 2012 -t /x Comedy,Drama
+-m the -y > 2012 -t /i Comedy /x Drama
+-m the -y > 2012 -t /x Comedy /i Drama
+
+-m the -y > 2012 -r = 4.5
+-m the -y > 2012 -r < 2.5
+-m the -y > 2012 -r > 4.5
+-m the -y > 2012 -r | 4.0,4.5
+
+-m the -y | 2010,2012 -t /i Comedy,Drama
+-m the -y | 2010,2012 -t /x Comedy,Drama
+-m the -y | 2010,2012 -t /i Comedy /x Drama
+-m the -y | 2010,2012 -t /x Comedy /i Drama
+
+-m the -y | 2010,2012 -r = 4.5
+-m the -y | 2010,2012 -r < 2.5
+-m the -y | 2010,2012 -r > 4.5
+-m the -y | 2010,2012 -r | 4.0,4.5                              //OK
+
+-m the -t /i Comedy,Drama -r = 4.5                              //OK                                        
+-m the -t /i Comedy,Drama -r < 4.5                                                 
+-m the -t /i Comedy,Drama -r > 4.5                                                        
+-m the -t /i Comedy,Drama -r | 4.0,4.5                          //OK                                        
+
+-m the -t /x Comedy,Drama -r = 4.5                                                 
+-m the -t /x Comedy,Drama -r < 4.5                                                 
+-m the -t /x Comedy,Drama -r > 4.5                                                        
+-m the -t /x Comedy,Drama -r | 4.0,4.5    
+
+-m the -y = 2012 -t /i Comedy,Drama -r = 4.5                    //OK
+-m the -y < 2012 -t /i Comedy,Drama -r = 4.5                    //OK
+-m the -y > 2012 -t /i Comedy,Drama -r = 4.5                                    
+-m the -y | 2010,2012 -t /i Comedy,Drama -r = 4.5                                     
+-m the -y | 2012,2010 -t /i Comedy,Drama -r = 4.5
+
+-m the -y = 2012 -t /x Comedy,Drama -r = 4.5
+-m the -y < 2012 -t /x Comedy,Drama -r = 4.5                                    
+-m the -y > 2012 -t /x Comedy,Drama -r = 4.5                                  
+-m the -y | 2010,2012 -t /x Comedy,Drama -r = 4.5                                   
+-m the -y | 2012,2010 -t /x Comedy,Drama -r = 4.5
+
+-m the -y = 2012 -t /i Comedy /x Drama -r = 4.5
+-m the -y < 2012 -t /i Comedy /x Drama -r = 4.5                       
+-m the -y > 2012 -t /i Comedy /x Drama -r = 4.5                    
+-m the -y | 2010,2012 -t /i Comedy /x Drama -r = 4.5                         
+-m the -y | 2012,2010 -t /i Comedy /x Drama -r = 4.5
+
+-m the -y = 2012 -t /x Comedy /i Drama -r = 4.5
+-m the -y < 2012 -t /x Comedy /i Drama -r = 4.5                              
+-m the -y > 2012 -t /x Comedy /i Drama -r = 4.5                              
+-m the -y | 2010,2012 -t /x Comedy /i Drama -r = 4.5                                
+-m the -y | 2012,2010 -t /x Comedy /i Drama -r = 4.5
+
+//--------------------------------------------------
+
+-m the -y = 2012 -t /i Comedy,Drama -r < 4.5  
+-m the -y < 2012 -t /i Comedy,Drama -r < 4.5                    
+-m the -y > 2012 -t /i Comedy,Drama -r < 4.5                                    
+-m the -y | 2010,2012 -t /i Comedy,Drama -r < 4.5                                     
+-m the -y | 2012,2010 -t /i Comedy,Drama -r < 4.5
+
+-m the -y = 2012 -t /x Comedy,Drama -r < 4.5
+-m the -y < 2012 -t /x Comedy,Drama -r < 4.5                                    
+-m the -y > 2012 -t /x Comedy,Drama -r < 4.5                                  
+-m the -y | 2010,2012 -t /x Comedy,Drama -r < 4.5                                   
+-m the -y | 2012,2010 -t /x Comedy,Drama -r < 4.5
+
+-m the -y = 2012 -t /i Comedy /x Drama -r < 4.5
+-m the -y < 2012 -t /i Comedy /x Drama -r < 4.5                       
+-m the -y > 2012 -t /i Comedy /x Drama -r < 4.5                    
+-m the -y | 2010,2012 -t /i Comedy /x Drama -r < 4.5                         
+-m the -y | 2012,2010 -t /i Comedy /x Drama -r < 4.5
+
+-m the -y = 2012 -t /x Comedy /i Drama -r < 4.5
+-m the -y < 2012 -t /x Comedy /i Drama -r < 4.5                              
+-m the -y > 2012 -t /x Comedy /i Drama -r < 4.5                              
+-m the -y | 2010,2012 -t /x Comedy /i Drama -r < 4.5                                
+-m the -y | 2012,2010 -t /x Comedy /i Drama -r < 4.5
+
+//--------------------------------------------------
+
+-m the -y = 2012 -t /i Comedy,Drama -r > 4.5  
+-m the -y < 2012 -t /i Comedy,Drama -r > 4.5                    
+-m the -y > 2012 -t /i Comedy,Drama -r > 4.5                                    
+-m the -y | 2010,2012 -t /i Comedy,Drama -r > 4.5                                     
+-m the -y | 2012,2010 -t /i Comedy,Drama -r > 4.5
+
+-m the -y = 2012 -t /x Comedy,Drama -r > 4.5
+-m the -y < 2012 -t /x Comedy,Drama -r > 4.5                                    
+-m the -y > 2012 -t /x Comedy,Drama -r > 4.5                                  
+-m the -y | 2010,2012 -t /x Comedy,Drama -r > 4.5                                   
+-m the -y | 2012,2010 -t /x Comedy,Drama -r > 4.5
+
+-m the -y = 2012 -t /i Comedy /x Drama -r > 4.5
+-m the -y < 2012 -t /i Comedy /x Drama -r > 4.5                       
+-m the -y > 2012 -t /i Comedy /x Drama -r > 4.5                    
+-m the -y | 2010,2012 -t /i Comedy /x Drama -r > 4.5                         
+-m the -y | 2012,2010 -t /i Comedy /x Drama -r > 4.5
+
+-m the -y = 2012 -t /x Comedy /i Drama -r > 4.5
+-m the -y < 2012 -t /x Comedy /i Drama -r > 4.5                              
+-m the -y > 2012 -t /x Comedy /i Drama -r > 4.5                              
+-m the -y | 2010,2012 -t /x Comedy /i Drama -r > 4.5                                
+-m the -y | 2012,2010 -t /x Comedy /i Drama -r > 4.5                        //OK
+
+//------------------------------------------------
+
+-m the -y = 2012 -t /i Comedy,Drama -r | 4.0,4.5  
+-m the -y < 2012 -t /i Comedy,Drama -r | 4.0,4.5                    
+-m the -y > 2012 -t /i Comedy,Drama -r | 4.0,4.5                                    
+-m the -y | 2010,2012 -t /i Comedy,Drama -r | 4.0,4.5                                  
+-m the -y | 2012,2010 -t /i Comedy,Drama -r | 4.0,4.5
+
+-m the -y = 2012 -t /x Comedy,Drama -r | 4.0,4.5
+-m the -y < 2012 -t /x Comedy,Drama -r | 4.0,4.5                                    
+-m the -y > 2012 -t /x Comedy,Drama -r | 4.0,4.5                                  
+-m the -y | 2010,2012 -t /x Comedy,Drama -r | 4.0,4.5                               
+-m the -y | 2012,2010 -t /x Comedy,Drama -r | 4.0,4.5
+
+-m the -y = 2012 -t /i Comedy /x Drama -r | 4.0,4.5
+-m the -y < 2012 -t /i Comedy /x Drama -r | 4.0,4.5                       
+-m the -y > 2012 -t /i Comedy /x Drama -r | 4.0,4.5                   
+-m the -y | 2010,2012 -t /i Comedy /x Drama -r | 4.0,4.5                     
+-m the -y | 2012,2010 -t /i Comedy /x Drama -r | 4.0,4.5
+
+-m the -y = 2012 -t /x Comedy /i Drama -r | 4.0,4.5
+-m the -y < 2012 -t /x Comedy /i Drama -r | 4.0,4.5                              
+-m the -y > 2012 -t /x Comedy /i Drama -r | 4.0,4.5                              
+-m the -y | 2010,2012 -t /x Comedy /i Drama -r | 4.0,4.5                               
+-m the -y | 2012,2010 -t /x Comedy /i Drama -r | 4.0,4.5
+
+//========================================================================
+
+-y = 2012                                                                  //OK                                
+-y < 2012                                                                  //OK
+-y > 2012                                                                  //OK                         
+-y | 2010,2012                                           
+-y | 2012,2010                                           
+--------------------------------------------------------------------------
+-y = 2012 -t /i Comedy,Drama                                               //OK  
+-y = 2012 -t /x Comedy,Drama                              
+-y = 2012 -t /i Comedy /x Drama                          
+-y = 2012 -t /x Comedy /i Drama                                             //OK
+
+-y = 2012 -r = 4.5                                                            
+-y = 2012 -r < 2.5                                       
+-y = 2012 -r > 4.5                                       
+-y = 2012 -r | 4.0,4.5                                                      //OK                   
+--------------------------------------------------------------------------
+-y < 2012 -t /i Comedy,Drama                             
+-y < 2012 -t /x Comedy,Drama                              
+-y < 2012 -t /i Comedy /x Drama                          
+-y < 2012 -t /x Comedy /i Drama                          
+
+-y < 2012 -r = 4.5                                                            
+-y < 2012 -r < 2.5                                       
+-y < 2012 -r > 4.5                                       
+-y < 2012 -r | 4.0,4.5                                   
+--------------------------------------------------------------------------
+-y > 2012 -t /i Comedy,Drama                     
+-y > 2012 -t /x Comedy,Drama
+-y > 2012 -t /i Comedy /x Drama
+-y > 2012 -t /x Comedy /i Drama
+
+-y > 2012 -r = 4.5
+-y > 2012 -r < 2.5
+-y > 2012 -r > 4.5
+-y > 2012 -r | 4.0,4.5
+--------------------------------------------------------------------------
+-y | 2010,2012 -t /i Comedy,Drama
+-y | 2010,2012 -t /x Comedy,Drama
+-y | 2010,2012 -t /i Comedy /x Drama
+-y | 2010,2012 -t /x Comedy /i Drama
+--------------------------------------------------------
+-y = 2012 -t /i Comedy,Drama -r = 4.5  
+-y < 2012 -t /i Comedy,Drama -r = 4.5                    
+-y > 2012 -t /i Comedy,Drama -r = 4.5                                    
+-y | 2010,2012 -t /i Comedy,Drama -r = 4.5                                     
+
+
+-y = 2012 -t /x Comedy,Drama -r = 4.5
+-y < 2012 -t /x Comedy,Drama -r = 4.5                                    
+-y > 2012 -t /x Comedy,Drama -r = 4.5                                  
+-y | 2010,2012 -t /x Comedy,Drama -r = 4.5                                   
+
+
+-y = 2012 -t /i Comedy /x Drama -r = 4.5
+-y < 2012 -t /i Comedy /x Drama -r = 4.5                       
+-y > 2012 -t /i Comedy /x Drama -r = 4.5                    
+-y | 2010,2012 -t /i Comedy /x Drama -r = 4.5                         
+
+
+--------------------------------------------------------
+-y = 2012 -t /i Comedy,Drama -r < 4.5  
+-y < 2012 -t /i Comedy,Drama -r < 4.5                    
+-y > 2012 -t /i Comedy,Drama -r < 4.5                                    
+-y | 2010,2012 -t /i Comedy,Drama -r < 4.5                                     
+-y | 2012,2010 -t /i Comedy,Drama -r < 4.5
+
+-y = 2012 -t /x Comedy,Drama -r < 4.5
+-y < 2012 -t /x Comedy,Drama -r < 4.5                                    
+-y > 2012 -t /x Comedy,Drama -r < 4.5                                  
+-y | 2010,2012 -t /x Comedy,Drama -r < 4.5                                   
+
+
+-y = 2012 -t /i Comedy /x Drama -r < 4.5
+-y < 2012 -t /i Comedy /x Drama -r < 4.5                       
+-y > 2012 -t /i Comedy /x Drama -r < 4.5                    
+-y | 2010,2012 -t /i Comedy /x Drama -r < 4.5                         
+
+
+//--------------------------------------------------
+
+-y = 2012 -t /i Comedy,Drama -r > 4.5  
+-y < 2012 -t /i Comedy,Drama -r > 4.5                    
+-y > 2012 -t /i Comedy,Drama -r > 4.5                                    
+-y | 2010,2012 -t /i Comedy,Drama -r > 4.5                                     
+-y | 2012,2010 -t /i Comedy,Drama -r > 4.5
+
+-y = 2012 -t /x Comedy,Drama -r > 4.5
+-y < 2012 -t /x Comedy,Drama -r > 4.5                                    
+-y > 2012 -t /x Comedy,Drama -r > 4.5                                  
+-y | 2010,2012 -t /x Comedy,Drama -r > 4.5                                   
+-y | 2012,2010 -t /x Comedy,Drama -r > 4.5
+
+-y = 2012 -t /i Comedy /x Drama -r > 4.5
+-y < 2012 -t /i Comedy /x Drama -r > 4.5                       
+-y > 2012 -t /i Comedy /x Drama -r > 4.5                    
+-y | 2010,2012 -t /i Comedy /x Drama -r > 4.5                         
+-y | 2012,2010 -t /i Comedy /x Drama -r > 4.5
+
+-y = 2012 -t /x Comedy /i Drama -r > 4.5
+-y < 2012 -t /x Comedy /i Drama -r > 4.5                              
+-y > 2012 -t /x Comedy /i Drama -r > 4.5                              
+-y | 2010,2012 -t /x Comedy /i Drama -r > 4.5                                
+-y | 2012,2010 -t /x Comedy /i Drama -r > 4.5
+
+//------------------------------------------------
+
+-y = 2012 -t /i Comedy,Drama -r | 4.0,4.5  
+-y < 2012 -t /i Comedy,Drama -r | 4.0,4.5                    
+-y > 2012 -t /i Comedy,Drama -r | 4.0,4.5                                    
+-y | 2010,2012 -t /i Comedy,Drama -r | 4.0,4.5                                  
+-y | 2012,2010 -t /i Comedy,Drama -r | 4.0,4.5
+
+-y = 2012 -t /x Comedy,Drama -r | 4.0,4.5
+-y < 2012 -t /x Comedy,Drama -r | 4.0,4.5                                    
+-y > 2012 -t /x Comedy,Drama -r | 4.0,4.5                                  
+-y | 2010,2012 -t /x Comedy,Drama -r | 4.0,4.5                               
+-y | 2012,2010 -t /x Comedy,Drama -r | 4.0,4.5                      //OK
+
+-y = 2012 -t /i Comedy /x Drama -r | 4.0,4.5
+-y < 2012 -t /i Comedy /x Drama -r | 4.0,4.5                       
+-y > 2012 -t /i Comedy /x Drama -r | 4.0,4.5                   
+-y | 2010,2012 -t /i Comedy /x Drama -r | 4.0,4.5                     
+-y | 2012,2010 -t /i Comedy /x Drama -r | 4.0,4.5
+
+-y = 2012 -t /x Comedy /i Drama -r | 4.0,4.5
+-y < 2012 -t /x Comedy /i Drama -r | 4.0,4.5                              
+-y > 2012 -t /x Comedy /i Drama -r | 4.0,4.5                              
+-y | 2010,2012 -t /x Comedy /i Drama -r | 4.0,4.5                               
+-y | 2012,2010 -t /x Comedy /i Drama -r | 4.0,4.5                    
+
+//========================================================================
+
+-t /i Comedy,Drama                             
+-t /x Comedy,Drama                              
+-t /i Comedy /x Drama                          
+-t /x Comedy /i Drama   
+
+--------------------------------------------------------------------------
+-t /i Comedy,Drama -r = 4.5                     
+-t /x Comedy,Drama -r = 4.5                     
+-t /i Comedy /x Drama -r = 4.5                    
+-t /x Comedy /i Drama -r = 4.5
+
+-t /i Comedy,Drama -r < 4.5                            
+-t /x Comedy,Drama -r < 4.5                             
+-t /i Comedy /x Drama -r < 4.5                         
+-t /x Comedy /i Drama -r < 4.5  
+
+-t /i Comedy,Drama -r > 4.5                             
+-t /x Comedy,Drama -r > 4.5                             
+-t /i Comedy /x Drama -r > 4.5                         
+-t /x Comedy /i Drama -r > 4.5  
+
+-t /i Comedy,Drama -r | 4.0,4.5                
+-t /x Comedy,Drama -r | 4.0,4.5              
+-t /i Comedy /x Drama -r | 4.0,4.5             
+-t /x Comedy /i Drama -r | 4.0,4.5
+
+----------------------------------------------------------------------------
+
+//TODO Filter from previous results

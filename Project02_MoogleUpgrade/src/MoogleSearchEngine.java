@@ -439,7 +439,7 @@ public class MoogleSearchEngine {
 		List<Movie> toReturn = toFilter;
 		List<Movie> toRemove = new ArrayList<Movie>();
 		for(Movie a:toReturn) {
-			if(a.getYear() == year) toRemove.add(a);
+			if(a.getYear() != year) toRemove.add(a);
 		}
 		toReturn.removeAll(toRemove);
 		
