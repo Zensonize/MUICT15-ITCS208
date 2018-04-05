@@ -29,68 +29,80 @@ public class SimpleMovieSearchEngine implements BaseMovieSearchEngine {
 	@Override
 	public Map<Integer, Movie> loadMovies(String movieFilename) {
 		
-		Map<Integer, Movie> movList = new HashMap<Integer, Movie>();
+		Map<Integer, Movie> loadedData = new HashMap<Integer, Movie>();
+		
 		try {
+			File movieData = new File(movieFilename);
+			InputStream reader = new FileInputStream(movieData);
+			BufferedReader read = new BufferedReader(new InputStreamReader(reader));
+			String stream = "";
 			
-			File inputMov = new File(movieFilename);
-			
-			InputStream inputFS = new FileInputStream(inputMov);						// -|
-			BufferedReader br = new BufferedReader(new InputStreamReader(inputFS));		//  | Read File
-			String stream = "";															// -|
-			
-			br.readLine(); 																// -| Skip header of .csv file
-			
-			while((stream = br.readLine()) != null) {
-				Movie check = readMovieData(stream);
-				if(check != null) {
-					movList.put(check.getID(), check);
+			while((stream = read.readLine()) != null) {
+				String regex = "(\\d+),(\"?)(.+) [(](\\d{4})[)](\"?),(.+)";
+				
+				Pattern p = Pattern.compile(regex);
+				Matcher m = p.matcher(stream);
+				
+				if(m.find()) {
+					int mid = Integer.parseInt(m.group(1));
+					String title = m.group(3);
+					int year = Integer.parseInt(m.group(4));
+					String[] tags = m.group(6).split("\\|");
+					
+					loadedData.put(mid, new Movie(mid,title,year));
+					
+					for(String key: tags) {
+						loadedData.get(mid).addTag(key);
+					}
 				}
 			}
+			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		return movList;
+		return loadedData;
 	}
 
 	@Override
 	public void loadRating(String ratingFilename) {
-
+		Map<Integer,User> users = new HashMap<Integer,User>();
 		try {
-			File inputRating = new File(ratingFilename);
-			InputStream inputFS = new FileInputStream(inputRating);
-			BufferedReader br = new BufferedReader(new InputStreamReader(inputFS));
+			File ratingData = new File(ratingFilename);
+			InputStream reader = new FileInputStream(ratingData);
+			BufferedReader read = new BufferedReader(new InputStreamReader(reader));
 			String stream = "";
-			br.readLine();																// | Skip header of .csv file
 			
-			int line = 0;
-			
-			while((stream = br.readLine()) != null) {
+			while((stream = read.readLine()) != null) {
 				
-				String regex = "(\\d+),(\\d+),(\\d+.\\d+),(\\d+)";						// -|
-				Pattern p = Pattern.compile(regex);										//  | Basic thing for RegEx
-				Matcher m = p.matcher(stream);											// -|
-				
-				Map<Integer,User> userList = new HashMap<Integer,User>();
+				String regex = "(\\d+),(\\d+),(\\d+.\\d+),(\\d+)";
+				Pattern p = Pattern.compile(regex);
+				Matcher m = p.matcher(stream);
 				
 				if(m.find()) {
+					
 					int uid = Integer.parseInt(m.group(1));								// -|
 					int movKey = Integer.parseInt(m.group(2));							//  |
 					double rating = Double.parseDouble(m.group(3));						//	| Applying RegEx
 					long timestamp = Long.parseLong(m.group(4));						// -|
 					
-					if(!userList.containsKey(uid)) {									// -|
-						userList.put(uid, new User(uid));								//  |Create a user List to prevent user duplication
+					if(!users.containsKey(uid)) {										// -|
+						users.put(uid, new User(uid));									//  | Create a user List to prevent user duplication
 					}																	// -|
 					
 					if(movies.containsKey(movKey)) {
-						movies.get(movKey).addRating(userList.get(uid), movies.get(movKey), rating, timestamp);
+						if(movies.get(movKey).getRating().containsKey(uid)) {
+							if(movies.get(movKey).getRating().get(uid).timestamp < timestamp) movies.get(movKey).getRating().replace(uid, new Rating(users.get(uid),movies.get(movKey),rating,timestamp)); 
+						}
+						else {
+							movies.get(movKey).addRating(users.get(uid), movies.get(movKey), rating, timestamp);
+						}
 					}
-					else System.out.println("No movies");
 				}
-				else System.out.println("Wrong Rating regex @line:" + line);
-				line++;
 			}
+			
+			reader.close();
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -107,7 +119,6 @@ public class SimpleMovieSearchEngine implements BaseMovieSearchEngine {
 	public Map<Integer, Movie> getAllMovies() {
 		return movies;
 	}
-	
 
 	@Override
 	public List<Movie> searchByTitle(String title, boolean exactMatch) {
@@ -232,54 +243,6 @@ public class SimpleMovieSearchEngine implements BaseMovieSearchEngine {
 		return unsortedMovies;
 	}
 		
-	private Movie readMovieData(String stream) {
-		String regx1 = "(\\d+),\"(.+) [(](\\d{4})[)]\",(.+)";
-		String regx2 = "(\\d+),(.+) [(](\\d{4})[)],(.+)";
-		
-		String title = null;															// -|
-		int mid = -1;																	//	| Initialize value
-		int year = -1;																	// -|
-		String tags =  null;
-		boolean found = false;
-		
-		Pattern p = Pattern.compile(regx1);
-		Matcher m = p.matcher(stream);
-		Movie mov = null;
-		
-		if(found = m.find()) {
-			mid = Integer.parseInt(m.group(1));
-			title = m.group(2);
-			year = Integer.parseInt(m.group(3));
-			tags = m.group(4);
-		}
-		
-		if(!found) {
-			p = Pattern.compile(regx2);
-			m=p.matcher(stream);
-			
-			if(found = m.find()) {
-				mid = Integer.parseInt(m.group(1));
-				title = m.group(2);
-				year = Integer.parseInt(m.group(3));
-				tags = m.group(4);
-			}
-		}
-		
-		if(!found || mid == -1 || title == null || year == -1) {
-			return null;
-		}
-		
-		mov = new Movie(mid,title,year);
-		
-		Pattern pt = Pattern.compile("[^| ]+");										// -|
-		Matcher mt = pt.matcher(tags);												//  |
-																					//  | Split Tags
-		while(mt.find()) {															//  |
-			mov.addTag(mt.group(0));												//  |
-		}
-		
-		return mov;
-	}
 }
 
 //------------------- Additional Class for Sorting Function [Comparator] ----------------------------------------
