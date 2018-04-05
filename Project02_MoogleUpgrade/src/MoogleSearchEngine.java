@@ -60,7 +60,7 @@ public class MoogleSearchEngine {
 
 		System.out.println("\t\t\t-----------------------------------\n");
 		System.out.println("Ex. -m <title> -t /i <Tag1>,<Tag2> /x <Tag3>,<Tag4> -y | <Year1>,<Year2> -s /4");
-		System.out.println("\n[E] Back");
+		System.out.println("\n[E] Back\n");
 	}
 
 	private static List<Movie> searchCompiler(MoogleS system, String request) {
@@ -505,33 +505,68 @@ public class MoogleSearchEngine {
 	}
 	
 	private static List<Movie> eliminateByRating_Exact(List<Movie> toFilter,double rating){
-		return null;
+		List<Movie> toReturn = toFilter;
+		List<Movie> toRemove = new ArrayList<Movie>();
+		int exactRating = (int) (rating*10)%100;
+		for(Movie a:toReturn) {
+			if(a.getExactRating() != exactRating) toRemove.add(a);
+		}
+		toReturn.removeAll(toRemove);
+		
+		return toReturn;
 	}
 	
 	private static List<Movie> eliminateByRating_Lessthan(List<Movie> toFilter,double lessthan){
-		return null;
+		List<Movie> toReturn = toFilter;
+		List<Movie> toRemove = new ArrayList<Movie>();
+		int exactRating = (int) (lessthan*10)%100;
+		for(Movie a:toReturn) {
+			if(a.getExactRating() > exactRating) toRemove.add(a);
+		}
+		toReturn.removeAll(toRemove);
+		
+		return toReturn;
 	}
 	
 	private static List<Movie> eliminateByRating_Morethan(List<Movie> toFilter,double morethan){
-		return null;
+		List<Movie> toReturn = toFilter;
+		List<Movie> toRemove = new ArrayList<Movie>();
+		int exactRating = (int) (morethan*10)%100;
+		for(Movie a:toReturn) {
+			if(a.getExactRating() < exactRating) toRemove.add(a);
+		}
+		toReturn.removeAll(toRemove);
+		
+		return toReturn;
 	}
 	
-	private static List<Movie> eliminateByRating_Between(List<Movie> toFilter,double a, double b){
-		return null;
+	private static List<Movie> eliminateByRating_Between(List<Movie> toFilter,double r1, double r2){
+		List<Movie> toReturn = toFilter;
+		List<Movie> toRemove = new ArrayList<Movie>();
+		int lowerBound = (int) (Math.min(r1,r2)*10)%100;
+		int upperBound = (int) (Math.max(r1,r2)*10)%100;
+		for(Movie a:toReturn) {
+			if(!(a.getExactRating() >= lowerBound && a.getExactRating() <= upperBound)) toRemove.add(a);
+		}
+		toReturn.removeAll(toRemove);
+		
+		return toReturn;
 	}
 	
 	private static List<Movie> eliminateByTags(List<Movie> toFilter, String[][] tags){
 		List<Movie> toReturn = toFilter;
-		
+
+		//change from and to or >> move include array inside movie loop
 		if(tags[0][0] != null) {
+			List<Movie> toRemove = new ArrayList<Movie>();
 			for(int include = 0; tags[0][include] != null;include++) {
-				for(ListIterator<Movie> a = toFilter.listIterator();a.hasNext();) {
-					Movie chk = a.next();
+				for(Movie chk:toReturn) {
 					if(!chk.getTags().contains(tags[0][include])) {
-						if(toReturn.contains(chk)) toReturn.remove(chk);
+						if(toReturn.contains(chk)) toRemove.add(chk);
 					}
 				}
 			}
+			toReturn.removeAll(toRemove);
 		}
 		
 		if(tags[1][0] != null) {
