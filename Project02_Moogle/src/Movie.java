@@ -1,6 +1,6 @@
-// Name:
-// Student ID:
-// Section: 
+// Name: Krittamet Kiattikulwattana
+// Student ID: 6088063
+// Section: 1
 
 import java.util.ArrayList;
 import java.util.HashMap;

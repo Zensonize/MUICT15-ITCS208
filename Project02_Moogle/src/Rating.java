@@ -1,8 +1,8 @@
 import java.util.Map;
 
-// Name:
-// Student ID:
-// Section: 
+//Name: Krittamet Kiattikulwattana
+//Student ID: 6088063
+//Section: 1
 
 public class Rating {
 	public Movie m;
