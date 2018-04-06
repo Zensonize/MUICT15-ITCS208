@@ -44,14 +44,14 @@ public class SimpleMovieSearchEngine implements BaseMovieSearchEngine {
 				Matcher m = p.matcher(stream);
 				
 				if(m.find()) {
-					int mid = Integer.parseInt(m.group(1));
-					String title = m.group(3);
-					int year = Integer.parseInt(m.group(4));
-					String[] tags = m.group(6).split("\\|");
+					int mid = Integer.parseInt(m.group(1));												//-| 
+					String title = m.group(3);															// | apply RegEx
+					int year = Integer.parseInt(m.group(4));											// |
+					String[] tags = m.group(6).split("\\|");											//-|
 					
 					loadedData.put(mid, new Movie(mid,title,year));
 					
-					for(String key: tags) {
+					for(String key: tags) {																//-| add tags
 						loadedData.get(mid).addTag(key);
 					}
 				}
@@ -124,15 +124,15 @@ public class SimpleMovieSearchEngine implements BaseMovieSearchEngine {
 	public List<Movie> searchByTitle(String title, boolean exactMatch) {
 
 		List<Movie> searchRes = new ArrayList<Movie>();
-		if(exactMatch){
+		if(exactMatch){																					
 			for(Integer key:movies.keySet()) {
-				if(movies.get(key).getTitle().toLowerCase().equals(title.toLowerCase())) {
+				if(movies.get(key).getTitle().toLowerCase().equals(title.toLowerCase())) {				//exact match case
 					searchRes.add(movies.get(key));
 				}
 			}
 		}
 		else {
-			for(Integer key:movies.keySet()) {
+			for(Integer key:movies.keySet()) {															// contains case
 				if(movies.get(key).getTitle().toLowerCase().contains(title.toLowerCase())){
 					searchRes.add(movies.get(key));
 				}

@@ -69,8 +69,8 @@ public class Movie {
 	}
 	
 	public void addRating(User user, Movie movie, double rating, long timestamp) {
-		if(ratings.containsKey(user.getID())) {
-			if(ratings.get(user.getID()).getTimeStamp() < timestamp) {
+		if(ratings.containsKey(user.getID())) {														//check for duplicate rating
+			if(ratings.get(user.getID()).getTimeStamp() < timestamp) {								//replace with newer rating
 				ratings.replace(user.getID(), new Rating(user,movie,rating,timestamp));
 			}
 		}
