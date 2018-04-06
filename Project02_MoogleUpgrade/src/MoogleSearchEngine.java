@@ -21,14 +21,17 @@ public class MoogleSearchEngine {
 		if(!(request.toUpperCase().charAt(0) == 'E')) {
 			
 			results = searchCompiler(system,request);
-			int index = 0;
-			if(!results.isEmpty()) {
+			int index = 1;
+			if(!results.isEmpty()) {																		//print search results if the results isn't empty
 				for(ListIterator<Movie> a = results.listIterator();a.hasNext();index++) {
 					System.out.println("[" + index + "]  " + a.next());
 				}
 			}
-			
-			switch(MoogleIOController.readChar('0', '1', "Your Choice: ")) {
+			System.out.println("------------------------------------------------------------");
+			System.out.println("\nResults: " + results.size() + " movies");
+			System.out.println("\n\t[0] Search again");
+			System.out.println("\t[E] Exit");
+			switch(MoogleIOController.readChar('0', '0', "Your Choice: ")) {
 				case '0':	start(system,me);	break;	
 				case 'E':						break;
 				default: 	start(system,me);	break;
@@ -37,12 +40,14 @@ public class MoogleSearchEngine {
 		
 	}
 	
+	/*
+	 * this method print search guideline
+	 */
 	private static void searchGuide() {
 		System.out.println("Search Guide:\t\t-m <Title> to Filter by Title");
 		System.out.println("\t\t\t-y  <Year> to Filter by Year");
 		System.out.println("\t\t\t-t  <Tags> to Filter by Tags");
 		System.out.println("\t\t\t-r  <Ratings> to Filter by Ratings\n");
-		System.out.println("\t\t\t-s  <Sorting> change Sorting Behavior (title as default)");
 		
 		System.out.println("\t\t\t-----------------------------------\n");
 		System.out.println("\t\t\t/i  <Tags>, to Include Specific Tags");
@@ -51,18 +56,15 @@ public class MoogleSearchEngine {
 		System.out.println("\t\t\t <  <Year or Ratings> to Include value less than the given value");
 		System.out.println("\t\t\t >  <Year or Ratings> to Include value more than the given value");
 		System.out.println("\t\t\t |  <Year or Ratings> to Include value between the given value\n");
-		System.out.println("\t\t\t/1  <Sorting> to sort by Title  in Descending Order");
-		System.out.println("\t\t\t/2  <Sorting> to sort by Rating in Ascending Order");
-		System.out.println("\t\t\t/3  <Sorting> to sort by Rating in Descending Order");
-		System.out.println("\t\t\t/4  <Sorting> to sort by Year   in Ascending Order");
-		System.out.println("\t\t\t/5  <Sorting> to sort by Year   in Descending Order");
-		System.out.println("\t\t\t/6  <Sorting> to sort by Rating in Descending Order then by Rating in Ascending Order");
 
 		System.out.println("\t\t\t-----------------------------------\n");
-		System.out.println("Ex. -m <title> -t /i <Tag1>,<Tag2> /x <Tag3>,<Tag4> -y | <Year1>,<Year2> -s /4");
-		System.out.println("\n[E] Back\n");
+		System.out.println("\tEx. -m <title> -t /i <Tag1>,<Tag2> /x <Tag3>,<Tag4> -y | <Year1>,<Year2> -s /4");
+		System.out.println("\n\t[E] Back\n");
 	}
-
+	
+	/*
+	 * this method get all extracted search request then get the results from results method and return it
+	 */
 	private static List<Movie> searchCompiler(MoogleS system, String request) {
 		String title = compileTitle(request);
 		int year[] = compileYear(request);
@@ -80,10 +82,10 @@ public class MoogleSearchEngine {
 		Matcher m = p.matcher(request);															// | Compile Title															
 		if(m.find()) {																			// |
 			prased = m.group(1);																//-|
-			prased = prased.trim();																//-| remove white in the back if typed "The  -"
+			prased = prased.trim();																//-| remove white space in the back if typed "The  -"
 		}
 		else{
-			System.out.println("No title");
+//			System.out.println("No title");
 			return null;
 		}
 		
@@ -104,20 +106,21 @@ public class MoogleSearchEngine {
 		}
 		else return null;
 		
-		switch(type) {
+		switch(type) {																			//-| find the year type 0: equal , 1 = less than , 2 = more than , 3 = between
 			case '=': prased[0] = 0;	break;
 			case '<': prased[0] = 1;	break;
 			case '>': prased[0] = 2;	break;
 			case '|': prased[0] = 3;	
-					  p = Pattern.compile(regx_year2);
+					  p = Pattern.compile(regx_year2);											//-| if it is between then get the year 2
 					  m = p.matcher(request);
 					  if(m.find()) {
 						  prased[2] = Integer.parseInt(m.group(1));
 					  }
+					  else prased[2] = 2020;													//-| if user didn't input correctly use 2020 instead
 					  break;
 		}
 		
-		System.out.println(prased[0] + " " + prased[1] + " " + prased[2]);
+//		System.out.println(prased[0] + " " + prased[1] + " " + prased[2]);
 		
 		return prased;
 	}
@@ -129,27 +132,28 @@ public class MoogleSearchEngine {
 		char type = 'n';
 		
 		Pattern p = Pattern.compile(regx_rating);												//-|
-		Matcher m = p.matcher(request);															// | Compile Year														
+		Matcher m = p.matcher(request);															// | Compile Rating												
 		if(m.find()) {																			// |
 			type = m.group(1).charAt(0);														//-|
 			prased[1] = Double.parseDouble(m.group(2));
 		}
 		else return null;
 		
-		switch(type) {
+		switch(type) {																			//-| find the rating type 0: equal , 1 = less than , 2 = more than , 3 = between
 			case '=': prased[0] = 0;	break;
 			case '<': prased[0] = 1;	break;
 			case '>': prased[0] = 2;	break;
-			case '|': prased[0] = 3;	
+			case '|': prased[0] = 3;															//-| if it is between then get the year 2
 					  p = Pattern.compile(regx_rating2);
 					  m = p.matcher(request);
 					  if(m.find()) {
 						  prased[2] = Double.parseDouble(m.group(1));
 					  }
+					  else prased[2] = 5;														//-| if user didn't input correctly use 5 instead
 					  break;
 		}
 		
-		System.out.println(prased[0] + " " + prased[1] + " " + prased[2]);
+//		System.out.println(prased[0] + " " + prased[1] + " " + prased[2]);
 		
 		return prased;
 	}
@@ -162,15 +166,15 @@ public class MoogleSearchEngine {
 		String regx_include = "-t.+/i ([\\S]+)";
 		String regx_exclude = "-t.+/x ([\\S]+)";
 		
-		Pattern p = Pattern.compile(regx_include);														//-|
-		Matcher m = p.matcher(request);																	// |
-		if(m.find()) {																					// | Compile Included tags
-			includeTags = m.group(1).split(",");														//-|
+		Pattern p = Pattern.compile(regx_include);												//-|
+		Matcher m = p.matcher(request);															// |
+		if(m.find()) {																			// | Compile Included tags
+			includeTags = m.group(1).split(",");												//-|
 			for(int i = 0; i<includeTags.length;i++) {
 				prased[0][i] = includeTags[i];
 			}
 		}
-		else System.out.println("no Include");
+//		else System.out.println("no Include");
 		
 		p = Pattern.compile(regx_exclude);														//-|
 		m = p.matcher(request);																	// |
@@ -180,16 +184,19 @@ public class MoogleSearchEngine {
 				prased[1][i] = excludeTags[i];
 			}
 		}
-		else System.out.println("no Exclude");
+//		else System.out.println("no Exclude");
 		
 		if(prased[0][0] == null && prased[1][0] == null) return null;
 		return prased;
 	}
 	
+	/*
+	 * this method manipulate the searching technique depend on search requirement
+	 */
 	private static List<Movie> results(MoogleS system, String title, int[] year, String[][] tags, double[] ratings) {
 		List<Movie> results = new ArrayList<Movie>();
 		
-		if(title != null) {
+		if(title != null) {																		// search with title first then eliminate with other thing (if present)
 			results = searchByTitle(system, title);
 			
 			if(year != null) {
@@ -203,7 +210,7 @@ public class MoogleSearchEngine {
 			}
 		}
 		
-		else if(year != null) {
+		else if(year != null) {																	// or search with year first (if title is not present) then eliminate with other thing (if present)
 			results = searchByYear(system, year);
 			if(tags != null) {
 				results = eliminateByTags(results, tags);
@@ -213,20 +220,23 @@ public class MoogleSearchEngine {
 			}
 		}
 		
-		else if(tags != null) {
+		else if(tags != null) {																	// or search with tags first (if title and year aren't not present) then eliminate with other thing (if present)
 			results = searchByTags(system, tags);
 			if(ratings != null) {
 				results = eliminateByRating(results, ratings);
 			}
 		}
 		
-		else if(ratings != null) {
+		else if(ratings != null) {																// or search with rating (if title year and tag aren't present
 			results = searchByRating(system, ratings);
 		}
 		
 		return results;
 	}
 	
+	/*
+	 * this method return all the movie that its title contain the given subtitle
+	 */
 	private static List<Movie> searchByTitle(MoogleS system, String title){
 		List<Movie> results = new ArrayList<Movie>();
 		for(Integer key: system.getMovies().keySet()) {
@@ -235,11 +245,14 @@ public class MoogleSearchEngine {
 		return results;
 	}
 	
+	/*
+	 * this method return all the movie which contain relevant tags
+	 */
 	private static List<Movie> searchByTags(MoogleS system,String[][] tags){
 		List<Movie> results = new ArrayList<Movie>();
 		System.out.println(tags[0].length);
 		
-		if(tags[0][0] != null) {
+		if(tags[0][0] != null) {																		// if include tags is present then search with include tags;
 			
 			for(int includeTags = 0;tags[0][includeTags] != null;includeTags++) {
 				
@@ -253,10 +266,10 @@ public class MoogleSearchEngine {
 				}	
 			}
 			
-			if(tags[1][0] != null) results = eliminateByTags(results, tags);
+			if(tags[1][0] != null) results = eliminateByTags(results, tags);							// if exclude tags is present them remove the movie that contain the exclude tags
 		}
 		
-		else {
+		else {																							// get all movie that does not contain any excluded tags
 			System.out.println("exclude search ");
 			for(Integer key: system.getMovies().keySet()) {
 				Boolean isValid = true;
@@ -272,6 +285,9 @@ public class MoogleSearchEngine {
 		return results;
 	}
 	
+	/*
+	 * this method manipulate searching technique by the year type (=,<,>,|)
+	 */
 	private static List<Movie> searchByYear(MoogleS system, int[] year){
 		List<Movie> results = new ArrayList<Movie>();
 		
@@ -285,6 +301,9 @@ public class MoogleSearchEngine {
 		return results;
 	}
 	
+	/*
+	 * this method search movie that have the matched year
+	 */
 	private static List<Movie> searchByYear_Exact(MoogleS system,int year){
 		List<Movie> results = new ArrayList<Movie>();
 		
@@ -297,6 +316,9 @@ public class MoogleSearchEngine {
 		return results;
 	}
 	
+	/*
+	 * this method search the movie that less than or equal the given year
+	 */
 	private static List<Movie> searchByYear_Lessthan(MoogleS system,int lessthan){
 		List<Movie> results = new ArrayList<Movie>();
 		
@@ -310,6 +332,9 @@ public class MoogleSearchEngine {
 		return results;
 	}
 	
+	/*
+	 * this method search the movie that more than or equal the given year
+	 */
 	private static List<Movie> searchByYear_Morethan(MoogleS system,int morethan){
 		List<Movie> results = new ArrayList<Movie>();
 		
@@ -323,16 +348,13 @@ public class MoogleSearchEngine {
 		return results;
 	}
 	
+	/*
+	 * this method search the movie that between the given two year
+	 */
 	private static List<Movie> searchByYear_Between(MoogleS system,int y1, int y2){
 		int from,to;
-		if(y1>y2) {
-			from = y2;
-			to  = y1;
-		}
-		else {
-			from = y1;
-			to = y2;
-		}
+		from = Math.min(y1, y2);																//prevent inverse input
+		to = Math.max(y1, y2);
 		
 		List<Movie> results = new ArrayList<Movie>();
 		
@@ -347,6 +369,9 @@ public class MoogleSearchEngine {
 		return results;
 	}
 	
+	/*
+	 * this method manipulate searching technique by the rating type (=,<,>,|)
+	 */
 	private static List<Movie> searchByRating(MoogleS system,double[] rating){
 		List<Movie> results = new ArrayList<Movie>();
 		
@@ -360,9 +385,12 @@ public class MoogleSearchEngine {
 		return results;
 	}
 	
+	/*
+	 * this method search movie that have the matched rating
+	 */
 	private static List<Movie> searchByRating_Exact(MoogleS system,double rating){
 		List<Movie> results = new ArrayList<Movie>();
-		int exactRating = (int) (rating*10)%100;
+		int exactRating = (int) (rating*10)%100;												//because we can't directly find exact double (3.00001 != 3.0001) so we use only 1 decimal point then convert to integer (3.125 --> 31)
 		for(Integer key: system.getMovies().keySet()) {
 			if(system.getMovies().get(key).getExactRating() == exactRating) {
 				results.add(system.getMovies().get(key));
@@ -372,6 +400,9 @@ public class MoogleSearchEngine {
 		return results;
 	}
 	
+	/*
+	 * this method search the movie that less than or equal the given year
+	 */
 	private static List<Movie> searchByRating_Lessthan(MoogleS system,double lessthan){
 		List<Movie> results = new ArrayList<Movie>();
 		int exactRating = (int) (lessthan*10)%100;
@@ -386,6 +417,9 @@ public class MoogleSearchEngine {
 		return results;
 	}
 	
+	/*
+	 * this method search the movie that more than or equal the given year
+	 */
 	private static List<Movie> searchByRating_Morethan(MoogleS system,double morethan){
 		List<Movie> results = new ArrayList<Movie>();
 		int exactRating = (int) (morethan*10)%100;
@@ -400,17 +434,14 @@ public class MoogleSearchEngine {
 		return results;
 	}
 	
+	/*
+	 * this method search the movie that between the given two year
+	 */
 	private static List<Movie> searchByRating_Between(MoogleS system,double a, double b){
 		List<Movie> results = new ArrayList<Movie>();
 		int lower,upper;
-		if(a>b) {
-			lower = (int) (b*10)%100;
-			upper = (int) (a*10)%100;
-		}
-		else {
-			lower = (int) (a*10)%100;
-			upper = (int) (b*10)%100;
-		}
+		lower = (int) (Math.min(a, b)*10)%100;
+		upper = (int) (Math.max(a, b)*10)%100;
 		for(int i=lower;i<=upper;i++) {
 			for(Integer key: system.getMovies().keySet()) {
 				if(system.getMovies().get(key).getExactRating() == i) {
@@ -423,6 +454,10 @@ public class MoogleSearchEngine {
 	}
 	
 	//Elimination
+	
+	/*
+	 * this method manipulate elimination technique by the year type (=,<,>,|)
+	 */
 	private static List<Movie> eliminateByYear(List<Movie> toFilter, int[] year){
 		List<Movie> filtered = toFilter;
 		
@@ -435,6 +470,9 @@ public class MoogleSearchEngine {
 		return filtered;
 	}
 	
+	/*
+	 * this method eliminate movie that didn't have the matched year
+	 */
 	private static List<Movie> eliminateByYear_Exact(List<Movie> toFilter,int year){
 		List<Movie> toReturn = toFilter;
 		List<Movie> toRemove = new ArrayList<Movie>();
@@ -446,6 +484,9 @@ public class MoogleSearchEngine {
 		return toReturn;
 	}
 	
+	/*
+	 * this method eliminate the movie that have year higher than the given year
+	 */
 	private static List<Movie> eliminateByYear_Lessthan(List<Movie> toFilter,int lessthan){
 		List<Movie> toReturn = toFilter;
 		List<Movie> toRemove = new ArrayList<Movie>();
@@ -457,6 +498,9 @@ public class MoogleSearchEngine {
 		return toReturn;
 	}
 	
+	/*
+	 * this method eliminate the movie that have year lower than the given year
+	 */
 	private static List<Movie> eliminateByYear_Morethan(List<Movie> toFilter,int morethan){
 		List<Movie> toReturn = toFilter;
 		List<Movie> toRemove = new ArrayList<Movie>();
@@ -468,6 +512,9 @@ public class MoogleSearchEngine {
 		return toReturn;
 	}
 	
+	/*
+	 * this method eliminate the movie that have year not between the given year
+	 */
 	private static List<Movie> eliminateByYear_Between(List<Movie> toFilter,int y1, int y2){
 		List<Movie> toReturn = toFilter;
 		List<Movie> toRemove = new ArrayList<Movie>();
@@ -480,6 +527,9 @@ public class MoogleSearchEngine {
 		return toReturn;
 	}
 	
+	/*
+	 * this method manipulate elimination technique by the rating type (=,<,>,|)
+	 */
 	private static List<Movie> eliminateByRating(List<Movie> toFilter,double[] rating){
 		List<Movie> filtered = toFilter;
 		
@@ -492,6 +542,9 @@ public class MoogleSearchEngine {
 		return filtered;
 	}
 	
+	/*
+	 * this method eliminate movie that didn't have the matched rating
+	 */
 	private static List<Movie> eliminateByRating_Exact(List<Movie> toFilter,double rating){
 		List<Movie> toReturn = toFilter;
 		List<Movie> toRemove = new ArrayList<Movie>();
@@ -504,6 +557,9 @@ public class MoogleSearchEngine {
 		return toReturn;
 	}
 	
+	/*
+	 * this method eliminate the movie that have rating higher than the given rating
+	 */
 	private static List<Movie> eliminateByRating_Lessthan(List<Movie> toFilter,double lessthan){
 		List<Movie> toReturn = toFilter;
 		List<Movie> toRemove = new ArrayList<Movie>();
@@ -516,6 +572,9 @@ public class MoogleSearchEngine {
 		return toReturn;
 	}
 	
+	/*
+	 * this method eliminate the movie that have rating lower than the given rating
+	 */
 	private static List<Movie> eliminateByRating_Morethan(List<Movie> toFilter,double morethan){
 		List<Movie> toReturn = toFilter;
 		List<Movie> toRemove = new ArrayList<Movie>();
@@ -528,6 +587,9 @@ public class MoogleSearchEngine {
 		return toReturn;
 	}
 	
+	/*
+	 * this method eliminate the movie that have rating not between the given rating
+	 */
 	private static List<Movie> eliminateByRating_Between(List<Movie> toFilter,double r1, double r2){
 		List<Movie> toReturn = toFilter;
 		List<Movie> toRemove = new ArrayList<Movie>();
@@ -541,11 +603,13 @@ public class MoogleSearchEngine {
 		return toReturn;
 	}
 	
+	/*
+	 * this method eliminate movie by the specified tags
+	 */
 	private static List<Movie> eliminateByTags(List<Movie> toFilter, String[][] tags){
 		List<Movie> toReturn = toFilter;
 
-		//change from and to or >> move include array inside movie loop
-		if(tags[0][0] != null) {
+		if(tags[0][0] != null) {												// if include tag is present then eliminate all movie that didn't contain any included tags
 			List<Movie> toRemove = new ArrayList<Movie>();
 			
 			for(Movie chk:toReturn) {
@@ -558,7 +622,7 @@ public class MoogleSearchEngine {
 			toReturn.removeAll(toRemove);
 		}
 		
-		if(tags[1][0] != null) {
+		if(tags[1][0] != null) {												// if exclude tag is present then eliminate all movie that contain any excluded tags
 			for(int exclude = 0; tags[1][exclude] != null;exclude++) {
 				List<Movie> toRemove = new ArrayList<Movie>();
 				for(Movie a:toReturn) {

@@ -6,6 +6,11 @@ import java.util.concurrent.TimeUnit;
 
 public class MoogleIOController {
 	
+	/* NOTE
+	 *  this method use in menu selection
+	 *  this method receive minChar and maxChar to control the possible input and string toEnter uses to print input header
+	 *  this method let 'E' passed because 'E' is an exit command
+	 */
 	public static char readChar(char minChar,char maxChar, String toEnter) {
 		
 		while(true) {
@@ -17,11 +22,16 @@ public class MoogleIOController {
 			else System.out.println("Wrong input\n");
 		}
 	}
+	
+	/* NOTE
+	 *  this method use in all integer input
+	 *  this method receive minInt and maxInt to control the possible input if entered integer, toEnter uses to print input header
+	 */
 	public static int readInt(int minInt, int maxInt, String toEnter) {
 		
 		while(true) {
 			Scanner in = new Scanner(System.in);
-			int stream = Integer.MIN_VALUE;
+			int stream = Integer.MIN_VALUE;										//prevent null input
 			System.out.print(toEnter);
 			try {
 				if(in.hasNextInt()) {
@@ -36,6 +46,10 @@ public class MoogleIOController {
 		
 	}
 	
+	/* NOTE
+	 *  this method use in all String input
+	 *  this method receive toEnter uses to print input header
+	 */
 	public static String readString(String toEnter) {
 	
 		while(true) {
@@ -46,6 +60,10 @@ public class MoogleIOController {
 		}
 	}
 	
+	/* NOTE
+	 *  this method use in search
+	 *  this method receive toEnter uses to print input header
+	 */
 	public static String readLine(String toEnter) {
 		while(true) {
 			Scanner in = new Scanner(System.in);
@@ -55,12 +73,9 @@ public class MoogleIOController {
 		}
 	}
 	
-	public static String readFileSource(String Requirement) {
-		return "";
-	}
-	
-	
-	
+	/* Note
+	 * this method use to wait to show error then refresh the program page
+	 */
 	public static void wait(int duration) {
 		try {
 			for(int i=0;i<duration;i++) {
@@ -73,6 +88,9 @@ public class MoogleIOController {
 		}
 	}
 	
+	/*
+	 * this method use to encrypt password
+	 */
 	public static String MD5(String md5) {
 		try {
 			java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
@@ -87,10 +105,16 @@ public class MoogleIOController {
 		return null;
 	}
 	
+	/*
+	 * this method use to separate between page
+	 */
 	public static void blankSpace() {
 		System.out.println("\n\n\n\n\n");
 	}
 	
+	/*
+	 * this method use to print separator line
+	 */
 	public static void headerLine() {
 		System.out.println("=============================\n");
 	}

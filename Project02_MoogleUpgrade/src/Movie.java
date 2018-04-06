@@ -68,6 +68,9 @@ public class Movie {
 		return avgRating;
 	}
 	
+	/*
+	 * this method return rating in integer after times 10 then mod 100 to get precise rating
+	 */
 	public int getExactRating() {
 		return (int) (avgRating*10)%100;
 	}

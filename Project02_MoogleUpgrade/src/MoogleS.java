@@ -177,7 +177,10 @@ public class MoogleS {
 		}
 	}
 	
-	public void updateFile() {
+	/*
+	 * these method call all updateFile method to update all movie, user and rating data
+	 */
+	public void updateFile() {	
 		updateMovies();
 		updateUsers();
 		updateRatings();
@@ -188,8 +191,7 @@ public class MoogleS {
 			PrintWriter pw  = new PrintWriter(new File("output\\movies.csv"));
 	        
 	        
-	        pw.println("movieId,title,genres\n");
-	        
+	        pw.println("movieId,title,genres\n");										//add header of csv file
 	        for(Integer key : movies.keySet()) {
 	        	StringBuilder movieOut = new StringBuilder();
 	        	movieOut.append(key + ",");
@@ -241,7 +243,7 @@ public class MoogleS {
 		try {			
 			PrintWriter pw = new PrintWriter(new File("output\\ratings.csv"));
 	        
-	        pw.println("userId,movieId,rating,timestamp");
+	        pw.println("userId,movieId,rating,timestamp");								//add header of csv file
 	        
 	        for(Integer key : movies.keySet()) {
 	        	for(Integer key2 : movies.get(key).getRating().keySet()) {

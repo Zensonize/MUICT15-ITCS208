@@ -10,12 +10,12 @@ public class MoogleLogin {
 		
 		userID = MoogleIOController.readInt(0, Integer.MAX_VALUE, "UserID: ");
 		password = MoogleIOController.MD5(MoogleIOController.readString("Password: "));
-		
-		if(system.getUser().containsKey(userID)) {
+				
+		if(system.getUser().containsKey(userID)) {																							//check if the user id is present
 			if(system.getUser().get(userID).getPassword().equals(password)) {
 				MoogleHome.start(system, system.getUser().get(userID));
 			}
-			else if(system.getUser().get(userID).getPassword().equals("-") && password.equals(MoogleIOController.MD5("root"))) {
+			else if(system.getUser().get(userID).getPassword().equals("-") && password.equals(MoogleIOController.MD5("root"))) {			//check if account is a predefined account
 				MoogleHome.start(system, system.getUser().get(userID));
 			}
 		}
