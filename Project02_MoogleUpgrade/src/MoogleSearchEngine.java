@@ -456,7 +456,7 @@ public class MoogleSearchEngine {
 	 */
 	private static List<Movie> eliminateByTitle(List<Movie> toFilter, String title){
 		List<Movie> toReturn = new ArrayList<Movie>();
-		for(Movie chk:toReturn) {
+		for(Movie chk:toFilter) {
 			if(chk.getTitle().toLowerCase().contains(title.toLowerCase())) {
 				toReturn.add(chk);
 			}
@@ -654,6 +654,7 @@ public class MoogleSearchEngine {
 		List<Movie> results = toFilter;
 		String request = MoogleIOController.readLine("Search: ");
 		String title = compileTitle(request);
+		System.out.println(title + "|");
 		int year[] = compileYear(request);
 		String[][] tags = compileTags(request);
 		double ratings[] = compileRatings(request);

@@ -50,6 +50,9 @@ public class MoogleS {
 		return false;
 	}
 	
+	/*
+	 * this method read movies.csv file
+	 */
 	public Map<Integer, Movie> loadMovies(String movieFile){
 		Map<Integer, Movie> loadedData = new HashMap<Integer, Movie>();
 		
@@ -86,6 +89,9 @@ public class MoogleS {
 		return loadedData;
 	}
 	
+	/*
+	 * this method read user.csv file
+	 */
 	public Map<Integer, User> loadUsers(File userFile){
 		Map<Integer, User> loadedData = new HashMap<Integer, User>();
 		
@@ -119,6 +125,9 @@ public class MoogleS {
 		return loadedData;
 	}
 	
+	/*
+	 * this method read rating.csv file
+	 */
 	public void loadRating(String ratingFile) {
 		
 		try {
@@ -189,6 +198,9 @@ public class MoogleS {
 		updateRatings();
 	}
 	
+	/*
+	 * this method export all movie to movie.csv
+	 */
 	private static void updateMovies() {
 		try {
 			PrintWriter pw  = new PrintWriter(new File("output\\movies.csv"));
@@ -214,6 +226,9 @@ public class MoogleS {
 		}
 	}
 	
+	/*
+	 * this method export all user to user.csv
+	 */
 	private static void updateUsers() {
 		
 		try {
@@ -241,6 +256,9 @@ public class MoogleS {
 		
 	}
 	
+	/*
+	 * this method export all rating to rating.csv
+	 */
 	private static void updateRatings() {
 		
 		try {			
