@@ -141,7 +141,10 @@ public class MoogleS {
 					long timestamp = Long.parseLong(m.group(4));						// -|
 					
 					if(!users.containsKey(uid)) {										// -|
-						users.put(uid, new User(uid));									//  | Create a user List to prevent user duplication
+						User readUser = new User(uid);									// -|
+						readUser.setPassword("-");										// -|
+						readUser.addName("-");											// -|
+						users.put(uid, readUser);										//  | Create a user List to prevent user duplication
 					}																	// -|
 					
 					if(movies.containsKey(movKey)) {

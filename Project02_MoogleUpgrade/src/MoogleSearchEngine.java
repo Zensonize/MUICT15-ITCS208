@@ -451,6 +451,9 @@ public class MoogleSearchEngine {
 	
 	//Elimination
 	
+	/*
+	 * this method eliminate movie which title does not contain the given title
+	 */
 	private static List<Movie> eliminateByTitle(List<Movie> toFilter, String title){
 		List<Movie> toReturn = new ArrayList<Movie>();
 		for(Movie chk:toReturn) {
@@ -644,6 +647,9 @@ public class MoogleSearchEngine {
 		return toReturn;
 	}
 
+	/*
+	 * this method let user to filter the previous results until there is no results
+	 */
 	private static void searchAgain(MoogleS system,User me, List<Movie> toFilter){
 		List<Movie> results = toFilter;
 		String request = MoogleIOController.readLine("Search: ");
@@ -652,7 +658,7 @@ public class MoogleSearchEngine {
 		String[][] tags = compileTags(request);
 		double ratings[] = compileRatings(request);
 		
-		if(request.charAt(0) != 'E' && !results.isEmpty()) {
+		if(request.charAt(0) != 'E' && !results.isEmpty()) {								//Eliminate the irrelevant movie from the previous results by new search command 
 			
 			if(title != null) {																	
 				results = eliminateByTitle(results, title);
@@ -669,7 +675,7 @@ public class MoogleSearchEngine {
 			
 			printResults(results);
 			
-			System.out.println("\n\t[0] Search again");
+			System.out.println("\n\t[0] Search again");										//if results = 0 user can't filter again
 			if(results.isEmpty()) {
 				System.out.println("\t[E] Exit");
 				switch(MoogleIOController.readChar('0', '0', "Your Choice: ")) {
@@ -678,7 +684,7 @@ public class MoogleSearchEngine {
 					default: 	start(system,me);		break;
 				}
 			}
-			else {
+			else {																			//if results != 0 user can filter again
 				System.out.println("\t[1] Filter more");
 				System.out.println("\t[E] Exit");
 				switch(MoogleIOController.readChar('0', '1', "Your Choice: ")) {
@@ -692,6 +698,9 @@ public class MoogleSearchEngine {
 		}
 	}
 	
+	/*
+	 * this method use to print results
+	 */
 	private static void printResults(List<Movie> results) {
 		int index = 1;
 		if(!results.isEmpty()) {																		//print search results if the results isn't empty
