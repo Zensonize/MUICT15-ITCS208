@@ -21,20 +21,16 @@ public class MoogleSearchEngine {
 		if(!(request.toUpperCase().charAt(0) == 'E')) {
 			
 			results = searchCompiler(system,request);
-			int index = 1;
-			if(!results.isEmpty()) {																		//print search results if the results isn't empty
-				for(ListIterator<Movie> a = results.listIterator();a.hasNext();index++) {
-					System.out.println("[" + index + "]  " + a.next());
-				}
-			}
-			System.out.println("------------------------------------------------------------");
-			System.out.println("\nResults: " + results.size() + " movies");
+			printResults(results);
+			
 			System.out.println("\n\t[0] Search again");
+			System.out.println("\t[1] Filter more");
 			System.out.println("\t[E] Exit");
-			switch(MoogleIOController.readChar('0', '0', "Your Choice: ")) {
-				case '0':	start(system,me);	break;	
-				case 'E':						break;
-				default: 	start(system,me);	break;
+			switch(MoogleIOController.readChar('0', '1', "Your Choice: ")) {
+				case '0':	start(system,me);				break;
+				case '1': 	searchAgain(system,me,results);	break;
+				case 'E':									break;
+				default: 	start(system,me);				break;
 			}
 		}
 		
@@ -455,6 +451,17 @@ public class MoogleSearchEngine {
 	
 	//Elimination
 	
+	private static List<Movie> eliminateByTitle(List<Movie> toFilter, String title){
+		List<Movie> toReturn = new ArrayList<Movie>();
+		for(Movie chk:toReturn) {
+			if(chk.getTitle().toLowerCase().contains(title.toLowerCase())) {
+				toReturn.add(chk);
+			}
+		}
+		
+		return toReturn;
+	}
+	
 	/*
 	 * this method manipulate elimination technique by the year type (=,<,>,|)
 	 */
@@ -635,5 +642,64 @@ public class MoogleSearchEngine {
 		}
 		
 		return toReturn;
+	}
+
+	private static void searchAgain(MoogleS system,User me, List<Movie> toFilter){
+		List<Movie> results = toFilter;
+		String request = MoogleIOController.readLine("Search: ");
+		String title = compileTitle(request);
+		int year[] = compileYear(request);
+		String[][] tags = compileTags(request);
+		double ratings[] = compileRatings(request);
+		
+		if(request.charAt(0) != 'E' && !results.isEmpty()) {
+			
+			if(title != null) {																	
+				results = eliminateByTitle(results, title);
+			}
+			if(year != null) {
+				results = eliminateByYear(results, year);
+			}
+			if(tags != null) {
+				results = eliminateByTags(results, tags);
+			}
+			if(ratings != null) {
+				results = eliminateByRating(results, ratings);
+			}
+			
+			printResults(results);
+			
+			System.out.println("\n\t[0] Search again");
+			if(results.isEmpty()) {
+				System.out.println("\t[E] Exit");
+				switch(MoogleIOController.readChar('0', '0', "Your Choice: ")) {
+					case '0':	start(system,me);		break;
+					case 'E':							break;
+					default: 	start(system,me);		break;
+				}
+			}
+			else {
+				System.out.println("\t[1] Filter more");
+				System.out.println("\t[E] Exit");
+				switch(MoogleIOController.readChar('0', '1', "Your Choice: ")) {
+					case '0':	start(system,me);				break;
+					case '1': 	searchAgain(system,me,results);	break;
+					case 'E':									break;
+					default: 	start(system,me);				break;
+				}
+			}
+			
+		}
+	}
+	
+	private static void printResults(List<Movie> results) {
+		int index = 1;
+		if(!results.isEmpty()) {																		//print search results if the results isn't empty
+			for(ListIterator<Movie> a = results.listIterator();a.hasNext();index++) {
+				System.out.println("[" + index + "]  " + a.next());
+			}
+		}
+		System.out.println("------------------------------------------------------------");
+		System.out.println("\nResults: " + results.size() + " movies");
 	}
 }
