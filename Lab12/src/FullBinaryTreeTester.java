@@ -1,4 +1,8 @@
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
@@ -9,13 +13,9 @@ public class FullBinaryTreeTester {
 	public static void inOrderTraverse(Node root)
 	{
 		if(root != null) {
-			if(root.left == null && root.right == null) System.out.print(root.id + " ");
-			else{
-				if(root.left != null) inOrderTraverse(root.left);
-				System.out.print(root.id + " ");
-				if(root.right != null) inOrderTraverse(root.right);
-				
-			}
+			inOrderTraverse(root.left);
+			System.out.print(root.id + " ");
+			inOrderTraverse(root.right);
 		}
 	}
 	
@@ -66,91 +66,40 @@ public class FullBinaryTreeTester {
 	/**************BONUS STARTS***************/
 	public static void printBinTree(Node root)
 	{	//YOUR BONUS CODE GOES HERE
-		nodeList = new ArrayList<Node>();
+		
+//		nodeList = new LinkedList<Node>();
+//		getNodeQueue(root);
+//		for(int level =treelevel(root, 0);level>=0;level--) {
+//			for(int n = 0;n<Math.pow(2, treelevel(root, 0)-level);n++) {
+//				if(!nodeList.isEmpty())	System.out.print(nodeList.poll().id + " ");
+//			}
+//			System.out.println("");
+//		}
 		if(root!= null) {
-			getNodeQueue(root);
-			for(Node key:nodeList) {
-				System.out.println(key.id + " Level: " + treelevel(key, 0));
-			}
-			System.out.println();
-			boolean globalStop = false;
-			for(int i=0;i!=nodeList.size();) {
-//				System.out.println("globalstop: " + globalStop);
-				if(i == 0) {
-					int headspc = 0;
-					switch(treelevel(nodeList.get(0), 0)) {
-					case 0: headspc = 0;	break;
-					case 1: headspc = 2;	break;
-					case 2: headspc = 5;	break;
-					case 3: headspc = 11;	break;
-					}
-					for(int spc = 0;spc < headspc;spc++) {
-						System.out.print(" ");
-					}
-					System.out.println(nodeList.get(0).id);
-					for(int spc = 0;spc < treelevel(nodeList.get(0), 0)*2-1;spc++) {
-						System.out.print(" ");
-					}
-					if(nodeList.get(0).left!=null) System.out.print("/");
-					else System.out.print(" ");
-					for(int spc = 0;spc < Math.pow(3, treelevel(nodeList.get(0), 0)-1);spc++) {
-						System.out.print(" ");
-					}
-					if(nodeList.get(0).right!=null) System.out.println("\\");
-					else System.out.println(" ");
-					i++;
-				}
-//				wait(3);
-//				System.out.println(nodeList.size());
-				int currentlevel;
-				boolean lineStart = true;
-				boolean smallStop = false;
-				while(!smallStop){
-					currentlevel = treelevel(nodeList.get(i), 0);
-//					System.out.println("CurrentLV: " + currentlevel);
-					if(lineStart) {
-						for(int spc = 0;spc<currentlevel*2;spc++) {
-							System.out.print(" ");
-						}
-					}
-					System.out.print(nodeList.get(i).id);
-					int spc_pair = 0;
-					switch(currentlevel) {
-					case 0: spc_pair = 3;	break;
-					case 1: spc_pair = 5;	break;
-					case 2: spc_pair = 11;	break;
-					}
-					for(int spc = 0;spc < spc_pair;spc++) {
-						System.out.print(" ");
-					}
-					i++;
-//					System.out.println("i=" + i);
-//					if(treelevel(nodeList.get(i), 0) != currentlevel) break;
-					System.out.print(nodeList.get(i).id);
-					System.out.print(" ");
-//					System.out.println("i=" + i);
-					i++;
-//					System.out.println("i = " + i);
-					
-					
-					if(i == (nodeList.size())) {
-						globalStop = true;
-						smallStop = true;
-//						System.out.println("globalstop: " + globalStop);
-					}
-					else {
-						
-						if(treelevel(nodeList.get(i), 0) != currentlevel) smallStop = true; globalStop = true;
-					}
-					
-				}
-	
+			if(root.left != null && root.right != null) {
+				System.out.println("  " + root.id);
+				if(root.left!=null) System.out.print(" /");
+				if(root.right!=null) System.out.print(" \\");
 				System.out.println();
+				if(root.left!=null) System.out.print(root.left.id);
+				else System.out.print(" ");
+				System.out.print("   ");
+				if(root.right!=null) System.out.print(root.right.id);
+				else System.out.print(" ");
+				System.out.println("\n");
+				printBinTree(root.left);
+				printBinTree(root.right);
 			}
+			
 		}
+		
+		
+		
+		
 	}
 	
 	public static void getNodeQueue(Node root){
+		
 		if(topmost) {
 			nodeList.add(root);
 //			System.out.println(root.id);
@@ -167,26 +116,71 @@ public class FullBinaryTreeTester {
 		if(root.left != null) getNodeQueue(root.left);
 		if(root.right != null) getNodeQueue(root.right);
 	}
-	
-//	public static int getNodePos(int curr, Node root, int pos) {
-//		if(root.id == curr) return pos;
-//		else
-//		return 0;
-//	}
-	public static Node getBinSearchTree(Node root)
+		
+	public static Node getBinSearchTree(List<Node> a)
 	{	//YOUR BONUS CODE GOES HERE
+		/*if(treelevel(root, 0) != 1) {
+			if(root.left !=null || root.right!= null) {
+				Node head;
+				if(root.left !=null && root.right!= null) {
+					Node leftSubTree = getBinSearchTree(root.left);
+					Node rightSubTree = getBinSearchTree(root.right);
+					head = new Node(root.id,getMinSubTree(leftSubTree,rightSubTree),getMaxSubTree(leftSubTree,rightSubTree));
+				}
+				else if(root.left != null) 
+					{
+						Node subTree = getBinSearchTree(root.left);
+						if(subTree.id > root.id) return new Node(root.id,null,subTree);
+						else return new Node(root.id,subTree,null);
+					}
+				else {
+					Node subTree = getBinSearchTree(root.right);
+					if(subTree.id > root.id) return new Node(root.id,null,subTree);
+					else return new Node(root.id,subTree,null);
+				}
+			}
+			else {
+				return nodeReArrange(root);
+			}
+			
+		}*/
+		if(a!= null || a.isEmpty()) {
+			if(a.size() > 3) {
+				List<Node> lower = new ArrayList<Node>();
+				List<Node> upper = new ArrayList<Node>();
+				int key = a.size()/2;
+				for(int i=0;i<a.size();i++) {
+					if(i==key) continue;
+					else if(a.get(i).id<a.get(key).id) lower.add(a.get(i));
+					else if(a.get(i).id>a.get(key).id) upper.add(a.get(i));
+				}
+//				System.out.print("Lower: ");
+//				for(Node l: lower) {
+//					System.out.print(l.id + " ");
+//				}
+				return new Node(a.get(key).id,getBinSearchTree(lower),getBinSearchTree(upper));
+			}
+			else {
+				if(a.size() == 3) return new Node(a.get(1).id,new Node (a.get(0).id,null,null),new Node (a.get(2).id,null,null));
+				else if (a.size() == 2) return new Node(a.get(1).id,new Node (a.get(0).id,null,null),null);
+				else return new Node(a.get(0).id,null,null);
+			}
+		}
 		return null;
+		
+		
 	}
-	
+
 	public static void bonusTester()
 	{
 		Node t = new Node(1, new Node(3, new Node(6, null, null), new Node(7, null, null)), 
 				new Node(4, new Node(8, null, null), new Node(10, null, null)));
-		System.out.println(treelevel(t, 0));
-//		System.out.println("Before Transforming: ");
+		System.out.println("Before Transforming: ");
 		printBinTree(t);
-//		System.out.println("After Transforming: ");
-//		getBinSearchTree(getBinSearchTree(t));
+		System.out.println("After Transforming: ");
+		nodeList = new LinkedList<Node>();
+		getNodeQueue(t);
+		printBinTree(getBinSearchTree(nodeList));
 		
 	}
 	
@@ -194,7 +188,6 @@ public class FullBinaryTreeTester {
 	public static int treelevel(Node root, int level) {
 		if(root == null) return level;
 		else {
-//			System.out.println("at node : " + root.id + " Level: " + level);
 			int left = 0,right = 0;
 			if(root.left == null && root.right == null) return level;
 			if(root.left != null) {
@@ -207,11 +200,13 @@ public class FullBinaryTreeTester {
 		}
 	}
 	
+	
+	
 	/**************BONUS ENDS***************/
 		
 	public static void main(String[] args)
 	{
-//		normalTester();
+		normalTester();
 		
 		//Uncomment for bonus
 		bonusTester();
@@ -228,85 +223,14 @@ public class FullBinaryTreeTester {
 			e.printStackTrace();
 		}
 	}
+	
+}
+
+class NodeComp implements Comparator<Node>{
+	public int compare(Node a,Node b) {
+		return a.id-b.id;
+	}
 }
 
 
-/*
- * if(root.left != null) printBinTree(root.left);
-		//print spacing between each node
-		for(int node_spc = 0;node_spc < treelevel(root, 0);node_spc++) {
-			System.out.print(" ");
-		}
-		if(root.right != null) {
-			printBinTree(root.right);
-		}
-		System.out.println();   								//print new line after finish each breadth
-*/
 
-//Can't print the top most node
-//if(root == null) System.out.println("");
-//else {
-////	System.out.println(root.id);
-////	System.out.println("\\ /");
-//	if(root.left != null) System.out.println(root.left.id);
-//	if(root.right != null) System.out.println(root.right.id);
-//	if(root.left != null) printBinTree(root.left);
-//	if(root.right != null) printBinTree(root.right);
-//}
-
-/* 	//Almost work
-if(root == null) System.out.println("");
-else {
-	if(topmost) {
-		for(int spc = 0;spc < treelevel(root, 0)*2;spc++) {
-			System.out.print(" ");
-		}
-		System.out.println(root.id);
-		for(int spc = 0;spc < (treelevel(root, 0)*2-1);spc++) {
-			System.out.print(" ");
-		}
-		System.out.println("/ \\");
-	}
-	topmost = false;
-	if(root.left != null) {
-		for(int spc = 0;spc < treelevel(root.left, 0)*2;spc++) {
-			System.out.print(" ");
-		}
-		System.out.print(root.left.id);
-	}
-	for(int spc = 0;spc < treelevel(root.left, 0)*2;spc++) {
-		System.out.print(" ");
-	}
-	if(root.right != null) {
-		System.out.print(root.right.id);
-	}
-	System.out.println();
-	if(root.left != null) {
-		for(int spc = 0;spc < (treelevel(root.left, 0)*2-1);spc++) {
-			System.out.print(" ");
-		}
-		System.out.print("/ \\");
-	}
-	if(root.right != null) {
-		for(int spc = 0;spc < (treelevel(root.left, 0)*2-1);spc++) {
-			System.out.print(" ");
-		}
-		System.out.print("/ \\");
-	}
-	System.out.println();
-	if(root.left != null) printBinTree(root.left);
-	if(root.right != null) printBinTree(root.right);
-	
-	1
-   / \
-  3  4
- / \ / \
-67
-/ \/ \
-
-
-
-
-810
-/ \/ \
-*/

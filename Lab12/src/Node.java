@@ -9,4 +9,12 @@ public class Node {
 		left = _left;
 		right = _right;
 	}
+	
+	public void addLeft(Node _left) {
+		left = _left;
+	}
+	
+	public void addRight(Node _right) {
+		right = _right;
+	}
 }
