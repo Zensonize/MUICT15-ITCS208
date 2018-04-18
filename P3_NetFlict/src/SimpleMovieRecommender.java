@@ -75,7 +75,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 				
 				if(rating>0.00001) {
 					if(userStream.containsKey(uid)) {
-						userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
+						if(userStream.get(uid).getRating().get(movies.get(mid)).timestamp < timestamp)userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
 					}
 					
 					else {
@@ -139,7 +139,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 				sumABSU += Math.abs(similar); 
 			}
 		}
-		if(isRated && sumABSU != 0) return p+(sumU/sumABSU);
+		if(isRated || sumABSU != 0) return p+(sumU/sumABSU);
 		else return 0;
 	}
 
