@@ -1,9 +1,11 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +124,28 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	@Override
 	public void trainModel(String modelFilename) {
 		// TODO Auto-generated method stub
+		double[][] rating_mat = new double[users.size()][movies.size()+1];
+		double[][] usersim_mat = new double[users.size()][users.size()];
+		int uidx = 0;
+		for(Integer ukey: users.keySet()) {
+			int midx = 0;
+			for(Integer mkey: movies.keySet()) {
+				if(users.get(ukey).ratings.containsKey(mkey)) rating_mat[uidx][midx] = users.get(ukey).ratings.get(mkey).rating;
+				else rating_mat[uidx][midx] = 0.0;
+				midx++;
+			}
+			uidx++;
+			int vidx = 0;
+			for(Integer vkey: users.keySet()) {
+				usersim_mat[uidx][vidx] = similarity(users.get(ukey), users.get(vkey));
+			}
+		}
 		
+		try {
+			PrintWriter pw = new PrintWriter(new File(modelFilename));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -152,13 +175,13 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	public double similarity(User u, User v) {
 		boolean isDisjoint = true;
 		double sumUV = 0, sumUsq = 0, sumVsq = 0;
-		for(Integer rated: u.getRating().keySet()) {
-			if(v.getRating().containsKey(rated)) {
-				if(u.getRating().get(rated).rating > 0 && v.getRating().get(rated).rating > 0) {
+		for(Integer rated: u.ratings.keySet()) {
+			if(v.ratings.containsKey(rated)) {
+				if(u.ratings.get(rated).rating > 0 && v.ratings.get(rated).rating > 0) {
 					isDisjoint = false;
-					sumUV += (u.getRating().get(rated).rating - u.getMeanRating())*(v.getRating().get(rated).rating - v.getMeanRating());
-					sumUsq += Math.pow(u.getRating().get(rated).rating - u.getMeanRating(), 2);
-					sumVsq += Math.pow(v.getRating().get(rated).rating - v.getMeanRating(), 2);
+					sumUV += (u.ratings.get(rated).rating - u.getMeanRating())*(v.ratings.get(rated).rating - v.getMeanRating());
+					sumUsq += Math.pow(u.ratings.get(rated).rating - u.getMeanRating(), 2);
+					sumVsq += Math.pow(v.ratings.get(rated).rating - v.getMeanRating(), 2);
 				}
 			}
 		}

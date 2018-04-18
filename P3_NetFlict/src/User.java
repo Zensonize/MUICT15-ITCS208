@@ -57,7 +57,4 @@ public class User implements Comparable<User>{
 		return (new Integer(uid)).compareTo(o.uid);
 	}
 	
-	public Map<Integer, Rating> getRating(){
-		return ratings;
-	}
 }
