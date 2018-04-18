@@ -66,21 +66,27 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 			String stream = "";
 			
 			while((stream = br.readLine()) != null) {
+				String regex = "(\\d+),(\\d+),(\\d+)(.?)(\\d+?),(\\d+)";
 				
-				String[] user = stream.split("\\,");
-				int uid = Integer.parseInt(user[0]);
-				int mid = Integer.parseInt(user[1]);
-				double rating = Double.parseDouble(user[2]);
-				long timestamp = Long.parseLong(user[3]);
+				Pattern p = Pattern.compile(regex);
+				Matcher m = p.matcher(stream);
 				
-				if(rating>0.00001) {
-					if(userStream.containsKey(uid)) {
-						if(userStream.get(uid).getRating().get(movies.get(mid)).timestamp < timestamp)userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
-					}
+				if(m.find()) {
+					String[] user = m.group(0).split("\\,");
+					int uid = Integer.parseInt(user[0]);
+					int mid = Integer.parseInt(user[1]);
+					double rating = Double.parseDouble(user[2]);
+					long timestamp = Long.parseLong(user[3]);
 					
-					else {
-						userStream.put(uid, new User(uid));
-						userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
+					if(rating>0.00001) {														// User has rated that movie (> 0)
+						if(userStream.containsKey(uid)) {										// If user exist 
+							userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
+						}
+						
+						else {
+							userStream.put(uid, new User(uid));
+							userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
+						}
 					}
 				}
 				
@@ -139,7 +145,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 				sumABSU += Math.abs(similar); 
 			}
 		}
-		if(isRated || sumABSU != 0) return p+(sumU/sumABSU);
+		if(isRated && sumABSU != 0) return p+(sumU/sumABSU);
 		else return 0;
 	}
 
