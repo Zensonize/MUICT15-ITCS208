@@ -18,7 +18,11 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 
 	Map<Integer, Movie> movies;
 	Map<Integer, User> users;
-	
+	Double[][] ratingModel,simModel;
+	List<Integer> useridx = new ArrayList<Integer>();
+	List<Integer> movieidx = new ArrayList<Integer>();
+	List<Double[]> ratingArray = new ArrayList<Double[]>();
+	List<Double[]> similarArray = new ArrayList<Double[]>();
 	@Override
 	public Map<Integer, Movie> loadMovies(String movieFilename) {
 		// TODO Auto-generated method stub
@@ -189,7 +193,59 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	@Override
 	public void loadModel(String modelFilename) {
 		// TODO Auto-generated method stub
-
+		try {
+			File model = new File(modelFilename);
+			LineIterator it = FileUtils.lineIterator(model, "UTF-8");
+			
+			int numUser,numMov;
+			try {
+				it.nextLine();										//skip num_user
+				String stream = it.nextLine().replace("@USER_MAP {", "");
+				String[] userMap = stream.split("\\, ");
+				for(String idlist:userMap) {
+					Pattern p = Pattern.compile("(\\d+)=(\\d+)(}?)");
+					Matcher m = p.matcher(idlist);
+					if(m.find()) {
+						useridx.add(Integer.parseInt(m.group(2)));
+					}
+				}
+				it.nextLine();										//skip num_movies
+				stream = it.nextLine().replace("@MOVIE_MAP {", "");
+				String[] movieMap = stream.split("\\, ");
+				for(String idlist:movieMap) {
+					Pattern p = Pattern.compile("(\\d+)=(\\d+)(}?)");
+					Matcher m = p.matcher(idlist);
+					if(m.find()) {
+						movieidx.add(Integer.parseInt(m.group(2)));
+					}
+				}
+				it.nextLine();										//skip rating_matrix header
+				int idxy = 0;
+				while(!(stream = it.nextLine()).contains("@USERSIM_MATRIX")){
+					String[] ratingArr = stream.split("\\ ");
+					Double[] ratingArrD = new Double[ratingArr.length];
+					for(int i =0;i<ratingArr.length;i++) {
+						ratingArrD[i] = Double.parseDouble(ratingArr[i]);
+					}
+					ratingArray.add(ratingArrD);
+				}
+				while(it.hasNext()){
+					stream = it.nextLine();
+					String[] simArr = stream.split("\\ ");
+					Double[] simArrD = new Double[simArr.length];
+					for(int i =0;i<simArr.length;i++) {
+						simArrD[i] = Double.parseDouble(simArr[i]);
+					}
+					similarArray.add(simArrD);
+				}
+			 } finally {
+			   LineIterator.closeQuietly(it);
+			 }
+		} catch(FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -225,6 +281,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		}
 		
 	}
+	
 	@Override
 	public List<MovieItem> recommend(User u, int fromYear, int toYear, int K) {
 		// TODO Auto-generated method stub
