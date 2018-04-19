@@ -1,8 +1,10 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -136,7 +138,34 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
+	
+	public double similarity(User u,User v) {
+		if(u.equals(v)) return 1;
+		if(u.ratings.size() <= 1 || v.ratings.size() <= 1) return 0;				// this case make r = average r --> denominator = 0
+		
+		List<Movie> intersec = new ArrayList<Movie>();
+		
+		for(Integer key: u.ratings.keySet()) {
+			if(v.ratings.containsKey(key)) intersec.add(u.ratings.get(key).m);		// count no.of int
+		}
+		
+		if(intersec.isEmpty()) return 0;											// user didn't rate same movie
+		
+		else {
+			double sumA = 0,sumB = 0,sumC = 0;										// (sumA) / [(sumB)(sumC)]
+			
+			for(ListIterator<Movie> k = intersec.listIterator();k.hasNext();) {
+				Movie cal = k.next();
+				double dU = u.ratings.get(cal.mid).rating-u.getMeanRating();
+				double dV = v.ratings.get(cal.mid).rating-v.getMeanRating();
+				sumA += dU*dV;
+				sumB += Math.pow(dU, 2);
+				sumC =+ Math.pow(dV, 2);
+			}
+			return sumA/ ((Math.pow(sumB, 0.5))*(Math.pow(sumC, 0.5)));
+		}
+		
+	}
 	@Override
 	public List<MovieItem> recommend(User u, int fromYear, int toYear, int K) {
 		// TODO Auto-generated method stub
