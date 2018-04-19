@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -124,7 +126,64 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	@Override
 	public void trainModel(String modelFilename) {
 		// TODO Auto-generated method stub
-
+		double[][] ratingMat = new double[users.size()][movies.size()+1];
+		double[][] simMat = new double[users.size()][users.size()];
+		int y=0,x=0;
+		System.out.println("@@@ Computing user rating matrix");
+		System.out.println("@@@ Computing user sim matrix");
+		for(Integer user: users.keySet()) {
+			x=0;
+			for(Integer mov: movies.keySet()) {
+				if(users.get(user).ratings.containsKey(mov)) ratingMat[y][x++] = users.get(user).ratings.get(mov).rating;
+				else ratingMat[y][x++] = 0;
+			}
+			ratingMat[y][x] = users.get(user).getMeanRating();
+			x=0;
+			for(Integer userB: users.keySet()) {
+				simMat[y][x++] = similarity(users.get(user), users.get(userB));
+			}
+			y++;
+		}
+		
+		System.out.println("@@@ Writing out model file");
+		try{
+			PrintWriter pw = new PrintWriter(new File(modelFilename));
+			
+			pw.println("@NUM_USERS " + users.size());
+			pw.print("@USER_MAP {");
+			int idx = 0;
+			for(Integer k:users.keySet()) {
+				pw.print(idx++ + "=" + k);
+				if(idx == users.size()) pw.println("}");
+				else pw.print(", ");
+			}
+			pw.println("@NUM_MOVIES " + movies.size());
+			pw.print("@MOVIE_MAP {");
+			idx = 0;
+			for(Integer k:movies.keySet()) {
+				pw.print(idx++ + "=" + k);
+				if(idx == movies.size()) pw.println("}");
+				else pw.print(", ");
+			}
+			pw.println("@RATING_MATRIX");
+			for(y = 0;y<users.size();y++) {
+				for(x = 0;x<movies.size();x++) {
+					pw.print(ratingMat[y][x] + " ");
+				}
+				pw.println(ratingMat[y][x]);
+			}
+			pw.println("@USERSIM_MATRIX");
+			for(y = 0;y<users.size();y++) {
+				for(x = 0;x<users.size()-1;x++) {
+					pw.print(simMat[y][x] + " ");
+				}
+				pw.println(simMat[y][x]);
+			}
+			
+			pw.close();
+		} catch (FileNotFoundException e) {
+			
+		}
 	}
 
 	@Override
