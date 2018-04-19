@@ -17,6 +17,9 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	Map<Integer, Movie> movies;
 	Map<Integer, User> users;
 	
+//	double[][] ratingModel_mat = new double[users.size()][movies.size()+1];
+//	double[][] usersimModel_mat = new double[users.size()][users.size()];
+	
 	@Override
 	public Map<Integer, Movie> loadMovies(String movieFilename) {
 		// TODO Auto-generated method stub
@@ -40,7 +43,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 					int year = Integer.parseInt(m.group(4));
 					String[] tags = m.group(6).split("\\|");
 					
-					movieStream.put(mid,new Movie(mid,title,year));
+					if(!movieStream.containsKey(mid))movieStream.put(mid,new Movie(mid,title,year));
 					
 					for(String k: tags) {
 						movieStream.get(mid).addTag(k);
@@ -134,15 +137,50 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 				else rating_mat[uidx][midx] = 0.0;
 				midx++;
 			}
-			uidx++;
+			
 			int vidx = 0;
 			for(Integer vkey: users.keySet()) {
 				usersim_mat[uidx][vidx] = similarity(users.get(ukey), users.get(vkey));
+				vidx++;
 			}
+			uidx++;
 		}
 		
+		// Export model files
+		System.out.println("@@@ Writing out model file");
 		try {
 			PrintWriter pw = new PrintWriter(new File(modelFilename));
+			pw.println("@NUM_USERS " + users.size());
+			pw.print("@USER_MAP {");
+			int counter = 0;
+			for(Integer key: users.keySet()) {
+				pw.print(counter++ + "=" + users.get(key).uid);
+				if(counter == users.size()) pw.println("}");
+				else pw.print(", ");
+			}
+			pw.println("@NUM_MOVIES " + movies.size());
+			pw.print("@MOVIE_MAP {");
+			counter = 0;
+			for(Integer key: movies.keySet()) {
+				pw.print(counter++ + "=" + movies.get(key).mid);
+				if(counter == movies.size()) pw.println("}");
+				else pw.print(", ");
+			}
+			pw.println("@RATING_MATRIX");
+			for(int i=0;i<users.size();i++) {
+				for(int j=0;j<movies.size()+1;j++) {
+					pw.print(rating_mat[i][j] + " ");
+				}
+				pw.println();
+			}
+			pw.println("@USERSIM_MATRIX");
+			for(int i=0;i<users.size();i++) {
+				for(int j=0;j<users.size();j++) {
+					pw.print(usersim_mat[i][j] + " ");
+				}
+				pw.println();
+			}
+			pw.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

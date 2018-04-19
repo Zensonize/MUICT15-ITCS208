@@ -6,6 +6,7 @@ public class Movie {
 	public String title = null;
 	public int year = -1;
 	public Set<String> tags = null;
+	public double predicted = 0;
 	public Movie(int _mid, String _title, int _year)
 	{
 		mid = _mid;
@@ -30,6 +31,10 @@ public class Movie {
 	public String toString()
 	{
 		return "[mid: "+mid+":"+title+" ("+year+") "+tags+"]";
+	}
+	
+	public void addPredicted(double p) {
+		predicted = p;
 	}
 	
 }
