@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -13,6 +16,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
+
+import javafx.util.Pair;
 
 public class SimpleMovieRecommender implements BaseMovieRecommender {
 
@@ -251,7 +256,20 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	@Override
 	public double predict(Movie m, User u) {
 		// TODO Auto-generated method stub
-		return 0;
+		int u_idx = useridx.indexOf(u.uid);
+		int m_idx = movieidx.indexOf(m.mid);
+		double sum_upper = 0,sum_lower = 0;
+		boolean isEmpty = true;
+		for(int v_idx = 0;v_idx<ratingArray.size();v_idx++) {			
+			if(v_idx!= u_idx && ratingArray.get(v_idx)[m_idx] > 0.01) {
+				isEmpty = false;
+				double similarity = similarArray.get(v_idx)[u_idx];
+				sum_upper += similarity*(ratingArray.get(v_idx)[m_idx]- ratingArray.get(v_idx)[movieidx.size()]);
+				sum_lower += Math.abs(similarity);
+			}
+		}
+		if(isEmpty || sum_lower == 0) return 0;
+		return ratingArray.get(u_idx)[movieidx.size()] + (sum_upper/sum_lower);
 	}
 	
 	public double similarity(User u,User v) {
@@ -284,8 +302,33 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	
 	@Override
 	public List<MovieItem> recommend(User u, int fromYear, int toYear, int K) {
-		// TODO Auto-generated method stub
-		return null;
+		List<MovieItem> recommended = new ArrayList<MovieItem>();
+		List<MovieItem> toReturn = new ArrayList<MovieItem>();
+		for(Integer key: movies.keySet()) {
+			if(movies.get(key).year>= fromYear && movies.get(key).year <= toYear) {
+				recommended.add(new MovieItem(movies.get(key),predict(movies.get(key), u)));
+			}
+		}
+		if(!recommended.isEmpty()) Collections.sort(recommended);
+		else System.out.println("Recommend is empty!");
+		int idx = 0;
+		for(ListIterator<MovieItem> topK = recommended.listIterator();topK.hasNext();) {
+			idx++;
+			toReturn.add(topK.next());
+			if(idx == K) break;
+		}
+		return toReturn;
 	}
-
+	
 }
+
+//class RecommendComparator implements Comparator<MovieItem>{
+//
+//	@Override
+//	public int compare(MovieItem arg0, MovieItem arg1) {
+//		if(arg0.getScore()>arg1.getScore()) return -1;
+//		else if(arg0.getScore()<arg1.getScore()) return 1;
+//		return 0;
+//	}
+//	
+//}
