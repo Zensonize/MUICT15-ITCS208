@@ -22,7 +22,6 @@ public class MovieItem implements Comparable<MovieItem>{
 	}
 
 
-
 	@Override
 	public int compareTo(MovieItem arg0) {
 		if(arg0 instanceof MovieItem)
@@ -32,6 +31,7 @@ public class MovieItem implements Comparable<MovieItem>{
 		}
 		return 0;
 	}
+
 	
 	@Override
 	public String toString()
