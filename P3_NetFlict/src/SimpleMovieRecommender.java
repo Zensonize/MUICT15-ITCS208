@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -87,12 +88,12 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 				    	 long timestamp = Long.parseLong(stream[3]);
 				    	 
 				    	 if(userStream.containsKey(uid)) {										// If user exist 
-				    		 userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
+				    		 if(rating>0.0) userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
 						 }
 							
 						 else {
 							 userStream.put(uid, new User(uid));
-							 userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
+							 if(rating>0.0) userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
 						 }
 			    	 } catch(NumberFormatException e) {
 //			    		 e.printStackTrace();
@@ -273,62 +274,47 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	}
 	
 	public double similarity(User u,User v) {
-		if(u.equals(v)) return 1;
-		if(u.ratings.size() <= 1 || v.ratings.size() <= 1) return 0;				// this case make r = average r --> denominator = 0
-		
-		List<Movie> intersec = new ArrayList<Movie>();
-		
-		for(Integer key: u.ratings.keySet()) {
-			if(v.ratings.containsKey(key)) intersec.add(u.ratings.get(key).m);		// count no.of int
-		}
-		
-		if(intersec.isEmpty()) return 0;											// user didn't rate same movie
-		
-		else {
-			double sumA = 0,sumB = 0,sumC = 0;										// (sumA) / [(sumB)(sumC)]
-			
-			for(ListIterator<Movie> k = intersec.listIterator();k.hasNext();) {
-				Movie cal = k.next();
-				double dU = u.ratings.get(cal.mid).rating-u.getMeanRating();
-				double dV = v.ratings.get(cal.mid).rating-v.getMeanRating();
-				sumA += dU*dV;
-				sumB += Math.pow(dU, 2);
-				sumC =+ Math.pow(dV, 2);
+		double sumA = 0.0,sumB = 0.0,sumC = 0.0,rU,rV;
+		if(u.uid == v.uid) return 1.0;
+		for(Integer movU: u.ratings.keySet()) {
+			if(v.ratings.containsKey(movU)){
+				rU = u.ratings.get(movU).rating - u.getMeanRating();
+				rV = v.ratings.get(movU).rating - v.getMeanRating();
+				sumA += rU*rV;
+				sumB += Math.pow(rU, 2);
+				sumC += Math.pow(rV, 2);
 			}
-			return sumA/ ((Math.pow(sumB, 0.5))*(Math.pow(sumC, 0.5)));
 		}
-		
+		if(sumB == 0.0 || sumC == 0.0) return 0.0;
+		sumB = Math.sqrt(sumB);
+		sumC = Math.sqrt(sumC);
+		double sim = sumA/(sumB*sumC);
+		if(Double.isNaN(sim)) return 0.0;
+		if(sim > 1.0) 	return 1.0;						//my sim = 1.0000000000000002 --> change to 1.0
+		if(sim < -1.0) 	return -1.0;					//my sim = -1.0000000000000002 --> change to -1.0
+		return sim;
 	}
 	
 	@Override
 	public List<MovieItem> recommend(User u, int fromYear, int toYear, int K) {
-		List<MovieItem> recommended = new ArrayList<MovieItem>();
+		List<MovieItem> recommendedMov = new ArrayList<MovieItem>();
 		List<MovieItem> toReturn = new ArrayList<MovieItem>();
+		
 		for(Integer key: movies.keySet()) {
 			if(movies.get(key).year>= fromYear && movies.get(key).year <= toYear) {
-				recommended.add(new MovieItem(movies.get(key),predict(movies.get(key), u)));
+				double predicted_V = predict(movies.get(key), u);
+				recommendedMov.add(new MovieItem(movies.get(key),predicted_V));
 			}
 		}
-		if(!recommended.isEmpty()) Collections.sort(recommended);
-		else System.out.println("Recommend is empty!");
-		int idx = 0;
-		for(ListIterator<MovieItem> topK = recommended.listIterator();topK.hasNext();) {
-			idx++;
-			toReturn.add(topK.next());
-			if(idx == K) break;
+		
+		Collections.sort(recommendedMov);
+		
+		for(int i = 0 ;i<K;i++) {
+			if(i<recommendedMov.size()) {
+				toReturn.add(recommendedMov.get(i));
+			}
 		}
 		return toReturn;
 	}
 	
 }
-
-//class RecommendComparator implements Comparator<MovieItem>{
-//
-//	@Override
-//	public int compare(MovieItem arg0, MovieItem arg1) {
-//		if(arg0.getScore()>arg1.getScore()) return -1;
-//		else if(arg0.getScore()<arg1.getScore()) return 1;
-//		return 0;
-//	}
-//	
-//}
