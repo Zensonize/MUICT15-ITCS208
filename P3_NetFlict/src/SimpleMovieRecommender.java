@@ -12,26 +12,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
+import com.google.common.collect.Sets;
+
 import javafx.util.Pair;
 
 public class SimpleMovieRecommender implements BaseMovieRecommender {
 
-	Map<Integer, Movie> movies;
-	Map<Integer, User> users;
-	Double[][] ratingModel,simModel;
-	List<Integer> useridx = new ArrayList<Integer>();
-	List<Integer> movieidx = new ArrayList<Integer>();
-	List<Double[]> ratingArray = new ArrayList<Double[]>();
-	List<Double[]> similarArray = new ArrayList<Double[]>();
+	Map<Integer,Movie> movies= new HashMap<Integer, Movie>();
+	Map<Integer,User> users = new HashMap<Integer, User>();
+	List<Integer> movieIndex = new ArrayList<Integer>();
+	List<Integer> userIndex = new ArrayList<Integer>();
+	Map<Integer,List<Integer>> movieClassifiedByYear = new HashMap<Integer,List<Integer>>();
+	double[][] similarOutArray;
+	List<double[]> similarArray = new ArrayList<double[]>();
+	
 	@Override
 	public Map<Integer, Movie> loadMovies(String movieFilename) {
-		// TODO Auto-generated method stub
 		Map<Integer, Movie> movieStream = new HashMap<Integer, Movie>();
 		
 		try {
@@ -43,14 +46,23 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 			   while (it.hasNext()) {
 			     String stream = it.nextLine();
 			     Pattern p = Pattern.compile(regex);
-				Matcher m = p.matcher(stream);
+			     Matcher m = p.matcher(stream);
+			     
 				if(m.find()) {
 					int mid = Integer.parseInt(m.group(1));
 					String title = m.group(3);
 					int year = Integer.parseInt(m.group(4));
 					String[] tags = m.group(6).split("\\|");
 					
-					if(!movieStream.containsKey(mid))movieStream.put(mid,new Movie(mid,title,year));
+					if(!movieStream.containsKey(mid)) {
+						movieStream.put(mid,new Movie(mid,title,year));
+						if(movieClassifiedByYear.containsKey(year)) movieClassifiedByYear.get(year).add(mid);
+						else{
+							List<Integer> mYear = new ArrayList<Integer>();
+							mYear.add(mid);
+							movieClassifiedByYear.put(year, mYear);
+						}
+					}
 					
 					for(String k: tags) {
 						movieStream.get(mid).addTag(k);
@@ -70,7 +82,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 
 	@Override
 	public Map<Integer, User> loadUsers(String userFilename) {
-		// TODO Auto-generated method stub 
+		
 		Map<Integer, User> userStream = new HashMap<Integer, User>();
 		
 		try {
@@ -93,7 +105,10 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 							
 						 else {
 							 userStream.put(uid, new User(uid));
-							 if(rating>0.0) userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
+							 if(rating>0.0) {
+								 userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
+								 movies.get(mid).ratedUser.add(userStream.get(uid));
+							 }
 						 }
 			    	 } catch(NumberFormatException e) {
 //			    		 e.printStackTrace();
@@ -119,6 +134,18 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		// TODO Auto-generated method stub
 		movies = loadMovies(movieFilename);
 		users = loadUsers(userFilename);
+		int idx = 0;
+		
+		for(Integer k:movies.keySet()) {				//generate movie index
+			movieIndex.add(k);
+			movies.get(k).addIndex(idx++);
+		}
+		idx = 0;
+		for(Integer k:users.keySet()) {					//generate user index
+			userIndex.add(k);
+			users.get(k).addIndex(idx++);
+			users.get(k).addAveRating(users.get(k).getMeanRating());
+		}
 	}
 
 	@Override
@@ -136,69 +163,47 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	@Override
 	public void trainModel(String modelFilename) {
 		// TODO Auto-generated method stub
-		double[][] ratingMat = new double[users.size()][movies.size()+1];
-		double[][] simMat = new double[users.size()][users.size()];
-		int y=0,x=0;
-		System.out.println("@@@ Computing user rating matrix");
-		System.out.println("@@@ Computing user sim matrix");
-		for(Integer user: users.keySet()) {
-			x=0;
-			for(Integer mov: movies.keySet()) {
-				if(users.get(user).ratings.containsKey(mov)) ratingMat[y][x] = users.get(user).ratings.get(mov).rating;
-				x++;
-			}
-			ratingMat[y][x] = users.get(user).getMeanRating();
-			x=0;
-			for(Integer userB: users.keySet()) {
-				simMat[y][x++] = similarity(users.get(user), users.get(userB));
-			}
-			y++;
-		}
 		
-		System.out.println("@@@ Writing out model file");
 		try{
 			PrintWriter pw = new PrintWriter(new File(modelFilename));
 			
 			pw.println("@NUM_USERS " + users.size());
 			//----------------------------------------------------------
-			pw.print("@USER_MAP {");
-			int idx = 0;
-			for(Integer k:users.keySet()) {
-				pw.print(idx++ + "=" + k);
-				if(idx == users.size()) pw.println("}");
-				else pw.print(", ");
-			}
+			pw.println("@USER_MAP " + userIndex);
 			//----------------------------------------------------------
 			pw.println("@NUM_MOVIES " + movies.size());
 			//----------------------------------------------------------
-			pw.print("@MOVIE_MAP {");
-			idx = 0;
-			for(Integer k:movies.keySet()) {
-				pw.print(idx++ + "=" + k);
-				if(idx == movies.size()) pw.println("}");
-				else pw.print(", ");
-			}
+			pw.print("@MOVIE_MAP " + movieIndex);
 			//----------------------------------------------------------
+			System.out.println("@@@ Computing user rating matrix");
 			pw.println("@RATING_MATRIX");
-			for(y = 0;y<users.size();y++) {
-				for(x = 0;x<movies.size();x++) {
-					pw.print(ratingMat[y][x] + " ");
-				}
-				pw.println(ratingMat[y][x]);
+			for(int y = 0;y<userIndex.size();y++) {
+				pw.println(users.get(userIndex.get(y)).getRatingArray(movies.size()));
 			}
 			//----------------------------------------------------------
+			System.out.println("@@@ Computing user sim matrix");
 			pw.println("@USERSIM_MATRIX");
-			for(y = 0;y<users.size();y++) {
-				for(x = 0;x<users.size()-1;x++) {
-					pw.print(simMat[y][x] + " ");
+			similarOutArray = new double[users.size()][users.size()];
+			for(int y = 0;y<userIndex.size();y++) {
+				for(int x = y;x<userIndex.size();x++) {
+					similarOutArray[y][x] = similarity(users.get(userIndex.get(y)), users.get(userIndex.get(x)));
+					similarOutArray[x][y] = similarOutArray[y][x];
 				}
-				pw.println(simMat[y][x]);
+				
+				for(int x = 0;x<userIndex.size();x++) {
+					pw.print(similarOutArray[y][x] + " ");
+				}
+				pw.println();
+				
 			}
+			
 			//----------------------------------------------------------
+			System.out.println("@@@ Writing out model file");
 			pw.close();
 		} catch (FileNotFoundException e) {
 			
 		}
+		
 	}
 
 	@Override
@@ -210,40 +215,42 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 			
 			int numUser,numMov;
 			try {
-				it.nextLine();										//skip num_user
-				String stream = it.nextLine().replace("@USER_MAP {", "");
-				String[] userMap = stream.split("\\, ");
-				for(String idlist:userMap) {
-					Pattern p = Pattern.compile("(\\d+)=(\\d+)(}?)");
-					Matcher m = p.matcher(idlist);
-					if(m.find()) {
-						useridx.add(Integer.parseInt(m.group(2)));
-					}
-				}
-				it.nextLine();										//skip num_movies
-				stream = it.nextLine().replace("@MOVIE_MAP {", "");
-				String[] movieMap = stream.split("\\, ");
-				for(String idlist:movieMap) {
-					Pattern p = Pattern.compile("(\\d+)=(\\d+)(}?)");
-					Matcher m = p.matcher(idlist);
-					if(m.find()) {
-						movieidx.add(Integer.parseInt(m.group(2)));
-					}
-				}
-				it.nextLine();										//skip rating_matrix header
-				int idxy = 0;
-				while(!(stream = it.nextLine()).contains("@USERSIM_MATRIX")){
-					String[] ratingArr = stream.split("\\ ");
-					Double[] ratingArrD = new Double[ratingArr.length];
-					for(int i =0;i<ratingArr.length;i++) {
-						ratingArrD[i] = Double.parseDouble(ratingArr[i]);
-					}
-					ratingArray.add(ratingArrD);
-				}
+//				it.nextLine();										//skip num_user
+//				String stream = it.nextLine().replace("@USER_MAP {", "");
+//				String[] userMap = stream.split("\\, ");
+//				for(String idlist:userMap) {
+//					Pattern p = Pattern.compile("(\\d+)=(\\d+)(}?)");
+//					Matcher m = p.matcher(idlist);
+//					if(m.find()) {
+//						useridx.add(Integer.parseInt(m.group(2)));
+//					}
+//				}
+//				it.nextLine();										//skip num_movies
+//				stream = it.nextLine().replace("@MOVIE_MAP {", "");
+//				String[] movieMap = stream.split("\\, ");
+//				for(String idlist:movieMap) {
+//					Pattern p = Pattern.compile("(\\d+)=(\\d+)(}?)");
+//					Matcher m = p.matcher(idlist);
+//					if(m.find()) {
+//						movieidx.add(Integer.parseInt(m.group(2)));
+//					}
+//				}
+//				it.nextLine();										//skip rating_matrix header
+//				int idxy = 0;
+//				while(!(stream = it.nextLine()).contains("@USERSIM_MATRIX")){
+//					String[] ratingArr = stream.split("\\ ");
+//					Double[] ratingArrD = new Double[ratingArr.length];
+//					for(int i =0;i<ratingArr.length;i++) {
+//						ratingArrD[i] = Double.parseDouble(ratingArr[i]);
+//					}
+//					ratingArray.add(ratingArrD);
+//				}				
+				String stream;
+				while(!(stream = it.nextLine()).contains("@USERSIM_MATRIX")) {}
 				while(it.hasNext()){
 					stream = it.nextLine();
 					String[] simArr = stream.split("\\ ");
-					Double[] simArrD = new Double[simArr.length];
+					double[] simArrD = new double[simArr.length];
 					for(int i =0;i<simArr.length;i++) {
 						simArrD[i] = Double.parseDouble(simArr[i]);
 					}
@@ -261,30 +268,38 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 
 	@Override
 	public double predict(Movie m, User u) {
-		// TODO Auto-generated method stub
-		int u_idx = useridx.indexOf(u.uid);
-		int m_idx = movieidx.indexOf(m.mid);
+
 		double sum_upper = 0,sum_lower = 0;
 		boolean isEmpty = true;
-		for(int v_idx = 0;v_idx<ratingArray.size();v_idx++) {			
-			if(v_idx!= u_idx && ratingArray.get(v_idx)[m_idx] > 0.01) {
-				isEmpty = false;
-				double similarity = similarArray.get(v_idx)[u_idx];
-				sum_upper += similarity*(ratingArray.get(v_idx)[m_idx]- ratingArray.get(v_idx)[movieidx.size()]);
-				sum_lower += Math.abs(similarity);
+		if(m.ratedUser.isEmpty()) return 0;
+		for(User v: m.ratedUser) {
+			if(v.uid != u.uid) {
+				double similar = similarArray.get(u.index)[v.index];
+				sum_upper += similar*(v.ratings.get(m.mid).rating - v.avRating);
+				sum_lower += Math.abs(similar);
 			}
 		}
-		if(isEmpty || sum_lower == 0) return 0;
-		return ratingArray.get(u_idx)[movieidx.size()] + (sum_upper/sum_lower);
+		double res = sum_upper/sum_lower;
+		return u.avRating + res;
+//				isEmpty = false;
+//				double similarity = similarArray.get(v_idx)[u_idx];
+//				sum_upper += similarity*(ratingArray.get(v_idx)[m_idx]- ratingArray.get(v_idx)[movieidx.size()]);
+//				sum_lower += Math.abs(similarity);
+//			}
+//		}
+//		if(isEmpty || sum_lower == 0) return 0;
+//		return ratingArray.get(u_idx)[movieidx.size()] + (sum_upper/sum_lower);
+
 	}
 	
 	public double similarity(User u,User v) {
 		double sumA = 0.0,sumB = 0.0,sumC = 0.0,rU,rV;
 		if(u.uid == v.uid) return 1.0;
+		
 		for(Integer movU: u.ratings.keySet()) {
 			if(v.ratings.containsKey(movU)){
-				rU = u.ratings.get(movU).rating - u.getMeanRating();
-				rV = v.ratings.get(movU).rating - v.getMeanRating();
+				rU = u.ratings.get(movU).rating - u.avRating;
+				rV = v.ratings.get(movU).rating - v.avRating;
 				sumA += rU*rV;
 				sumB += Math.pow(rU, 2);
 				sumC += Math.pow(rV, 2);
@@ -305,10 +320,12 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		List<MovieItem> recommendedMov = new ArrayList<MovieItem>();
 		List<MovieItem> toReturn = new ArrayList<MovieItem>();
 		
-		for(Integer key: movies.keySet()) {
-			if(movies.get(key).year>= fromYear && movies.get(key).year <= toYear) {
-				double predicted_V = predict(movies.get(key), u);
-				recommendedMov.add(new MovieItem(movies.get(key),predicted_V));
+		for(int y = fromYear;y<=toYear;y++) {
+			if(movieClassifiedByYear.containsKey(y)) {
+				for(Integer m: movieClassifiedByYear.get(y)) {
+					double predicted_V = predict(movies.get(m), u);
+					recommendedMov.add(new MovieItem(movies.get(m),predicted_V));
+				}
 			}
 		}
 		
@@ -319,7 +336,23 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 				toReturn.add(recommendedMov.get(i));
 			}
 		}
+		
+//		for(Integer key: movies.keySet()) {
+//			if(movies.get(key).year>= fromYear && movies.get(key).year <= toYear) {
+//				double predicted_V = predict(movies.get(key), u);
+//				recommendedMov.add(new MovieItem(movies.get(key),predicted_V));
+//			}
+//		}
+//		
+//		Collections.sort(recommendedMov);
+//		
+//		for(int i = 0 ;i<K;i++) {
+//			if(i<recommendedMov.size()) {
+//				toReturn.add(recommendedMov.get(i));
+//			}
+//		}
 		return toReturn;
 	}
+	
 	
 }

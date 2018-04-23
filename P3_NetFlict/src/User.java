@@ -1,11 +1,17 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class User implements Comparable<User>{
 	public int uid = 0;
 	Map<Integer, Rating> ratings = null;		//mapping movieID -> rating
+	List<Integer> ratingKey = new ArrayList<Integer>();
+	double avRating;
+	int index;
 	
 	public User(int _id)
 	{
@@ -31,6 +37,7 @@ public class User implements Comparable<User>{
 		if(r == null) 
 		{	r = new Rating(movie, rating, timestamp);
 			ratings.put(movie.getID(), r);
+			ratingKey.add(movie.getID());
 		}
 		else
 		{
@@ -59,4 +66,22 @@ public class User implements Comparable<User>{
 		return (new Integer(uid)).compareTo(o.uid);
 	}
 	
+	public String getRatingArray(int movieSize) {
+		double[] rating = new double[movieSize+1];
+		StringBuilder sb = new StringBuilder();
+		for(Integer r:ratings.keySet()) {
+			rating[ratings.get(r).m.index] = ratings.get(r).rating;
+			sb.append(rating[ratings.get(r).m.index] + " ");
+		}
+		
+		return sb.toString();
+	}
+	
+	public void addIndex(int index) {
+		this.index = index;
+	}
+	
+	public void addAveRating(double avRating) {
+		this.avRating = avRating;
+	}
 }
