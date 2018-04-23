@@ -144,8 +144,8 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		for(Integer user: users.keySet()) {
 			x=0;
 			for(Integer mov: movies.keySet()) {
-				if(users.get(user).ratings.containsKey(mov)) ratingMat[y][x++] = users.get(user).ratings.get(mov).rating;
-				else ratingMat[y][x++] = 0;
+				if(users.get(user).ratings.containsKey(mov)) ratingMat[y][x] = users.get(user).ratings.get(mov).rating;
+				x++;
 			}
 			ratingMat[y][x] = users.get(user).getMeanRating();
 			x=0;
@@ -160,6 +160,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 			PrintWriter pw = new PrintWriter(new File(modelFilename));
 			
 			pw.println("@NUM_USERS " + users.size());
+			//----------------------------------------------------------
 			pw.print("@USER_MAP {");
 			int idx = 0;
 			for(Integer k:users.keySet()) {
@@ -167,7 +168,9 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 				if(idx == users.size()) pw.println("}");
 				else pw.print(", ");
 			}
+			//----------------------------------------------------------
 			pw.println("@NUM_MOVIES " + movies.size());
+			//----------------------------------------------------------
 			pw.print("@MOVIE_MAP {");
 			idx = 0;
 			for(Integer k:movies.keySet()) {
@@ -175,6 +178,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 				if(idx == movies.size()) pw.println("}");
 				else pw.print(", ");
 			}
+			//----------------------------------------------------------
 			pw.println("@RATING_MATRIX");
 			for(y = 0;y<users.size();y++) {
 				for(x = 0;x<movies.size();x++) {
@@ -182,6 +186,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 				}
 				pw.println(ratingMat[y][x]);
 			}
+			//----------------------------------------------------------
 			pw.println("@USERSIM_MATRIX");
 			for(y = 0;y<users.size();y++) {
 				for(x = 0;x<users.size()-1;x++) {
@@ -189,7 +194,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 				}
 				pw.println(simMat[y][x]);
 			}
-			
+			//----------------------------------------------------------
 			pw.close();
 		} catch (FileNotFoundException e) {
 			
