@@ -169,16 +169,30 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 			
 			pw.println("@NUM_USERS " + users.size());
 			//----------------------------------------------------------
-			pw.println("@USER_MAP " + userIndex);
+			pw.print("@USER_MAP {");
+			StringBuilder um = new StringBuilder();
+			for(int i =0;i<userIndex.size();i++) {
+				um.append(i + "=" + userIndex.get(i));
+				if(i == userIndex.size()-1) um.append("}");
+				else um.append(" ");
+			}
+			pw.println(um.toString());
 			//----------------------------------------------------------
 			pw.println("@NUM_MOVIES " + movies.size());
 			//----------------------------------------------------------
-			pw.print("@MOVIE_MAP " + movieIndex);
+			pw.print("@MOVIE_MAP {");
+			StringBuilder mm = new StringBuilder();
+			for(int i =0;i<movieIndex.size();i++) {
+				mm.append(i + "=" + movieIndex.get(i));
+				if(i == movieIndex.size()-1) mm.append("}");
+				else mm.append(" ");
+			}
+			pw.println(mm.toString());
 			//----------------------------------------------------------
 			System.out.println("@@@ Computing user rating matrix");
 			pw.println("@RATING_MATRIX");
 			for(int y = 0;y<userIndex.size();y++) {
-				pw.println(users.get(userIndex.get(y)).getRatingArray(movies.size()));
+				pw.println(users.get(userIndex.get(y)).getRatingArray(movieIndex));
 			}
 			//----------------------------------------------------------
 			System.out.println("@@@ Computing user sim matrix");
@@ -215,36 +229,6 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 			
 			int numUser,numMov;
 			try {
-//				it.nextLine();										//skip num_user
-//				String stream = it.nextLine().replace("@USER_MAP {", "");
-//				String[] userMap = stream.split("\\, ");
-//				for(String idlist:userMap) {
-//					Pattern p = Pattern.compile("(\\d+)=(\\d+)(}?)");
-//					Matcher m = p.matcher(idlist);
-//					if(m.find()) {
-//						useridx.add(Integer.parseInt(m.group(2)));
-//					}
-//				}
-//				it.nextLine();										//skip num_movies
-//				stream = it.nextLine().replace("@MOVIE_MAP {", "");
-//				String[] movieMap = stream.split("\\, ");
-//				for(String idlist:movieMap) {
-//					Pattern p = Pattern.compile("(\\d+)=(\\d+)(}?)");
-//					Matcher m = p.matcher(idlist);
-//					if(m.find()) {
-//						movieidx.add(Integer.parseInt(m.group(2)));
-//					}
-//				}
-//				it.nextLine();										//skip rating_matrix header
-//				int idxy = 0;
-//				while(!(stream = it.nextLine()).contains("@USERSIM_MATRIX")){
-//					String[] ratingArr = stream.split("\\ ");
-//					Double[] ratingArrD = new Double[ratingArr.length];
-//					for(int i =0;i<ratingArr.length;i++) {
-//						ratingArrD[i] = Double.parseDouble(ratingArr[i]);
-//					}
-//					ratingArray.add(ratingArrD);
-//				}				
 				String stream;
 				while(!(stream = it.nextLine()).contains("@USERSIM_MATRIX")) {}
 				while(it.hasNext()){
@@ -281,35 +265,33 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		}
 		double res = sum_upper/sum_lower;
 		return u.avRating + res;
-//				isEmpty = false;
-//				double similarity = similarArray.get(v_idx)[u_idx];
-//				sum_upper += similarity*(ratingArray.get(v_idx)[m_idx]- ratingArray.get(v_idx)[movieidx.size()]);
-//				sum_lower += Math.abs(similarity);
-//			}
-//		}
-//		if(isEmpty || sum_lower == 0) return 0;
-//		return ratingArray.get(u_idx)[movieidx.size()] + (sum_upper/sum_lower);
 
 	}
 	
 	public double similarity(User u,User v) {
+		
 		double sumA = 0.0,sumB = 0.0,sumC = 0.0,rU,rV;
 		if(u.uid == v.uid) return 1.0;
+		Set<Integer> mU = u.ratings.keySet();
+		Set<Integer> mV = v.ratings.keySet();
+		Set<Integer> ins = Sets.intersection(mU, mV);
 		
-		for(Integer movU: u.ratings.keySet()) {
-			if(v.ratings.containsKey(movU)){
+		if(ins.size() == 1) return 0.0;
+		for(Integer movU: ins) {
+			
 				rU = u.ratings.get(movU).rating - u.avRating;
 				rV = v.ratings.get(movU).rating - v.avRating;
 				sumA += rU*rV;
 				sumB += Math.pow(rU, 2);
 				sumC += Math.pow(rV, 2);
-			}
+			
 		}
 		if(sumB == 0.0 || sumC == 0.0) return 0.0;
 		sumB = Math.sqrt(sumB);
 		sumC = Math.sqrt(sumC);
 		double sim = sumA/(sumB*sumC);
 		if(Double.isNaN(sim)) return 0.0;
+		if(sim *1000 < 0.0) return 0.0;
 		if(sim > 1.0) 	return 1.0;						//my sim = 1.0000000000000002 --> change to 1.0
 		if(sim < -1.0) 	return -1.0;					//my sim = -1.0000000000000002 --> change to -1.0
 		return sim;

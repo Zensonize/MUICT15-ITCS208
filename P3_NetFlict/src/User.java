@@ -66,13 +66,17 @@ public class User implements Comparable<User>{
 		return (new Integer(uid)).compareTo(o.uid);
 	}
 	
-	public String getRatingArray(int movieSize) {
-		double[] rating = new double[movieSize+1];
+	public String getRatingArray(List<Integer> movieIndex) {
+		double[] rating = new double[movieIndex.size()+1];
 		StringBuilder sb = new StringBuilder();
-		for(Integer r:ratings.keySet()) {
-			rating[ratings.get(r).m.index] = ratings.get(r).rating;
-			sb.append(rating[ratings.get(r).m.index] + " ");
+		for(int i=0;i<movieIndex.size();i++) {
+			if(ratings.containsKey(movieIndex.get(i))){
+				sb.append(ratings.get(movieIndex.get(i)).rating);
+			}
+			else sb.append("0.0");
+			sb.append(" ");
 		}
+		sb.append(avRating);
 		
 		return sb.toString();
 	}
