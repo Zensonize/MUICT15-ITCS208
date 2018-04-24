@@ -9,7 +9,7 @@ import java.util.Set;
 public class User implements Comparable<User>{
 	public int uid = 0;
 	Map<Integer, Rating> ratings = null;		//mapping movieID -> rating
-	List<Integer> ratingKey = new ArrayList<Integer>();
+	Map<Integer, Rating> ratingIndex = new HashMap<Integer, Rating>();
 	double avRating;
 	int index;
 	
@@ -37,7 +37,6 @@ public class User implements Comparable<User>{
 		if(r == null) 
 		{	r = new Rating(movie, rating, timestamp);
 			ratings.put(movie.getID(), r);
-			ratingKey.add(movie.getID());
 		}
 		else
 		{
@@ -66,15 +65,17 @@ public class User implements Comparable<User>{
 		return (new Integer(uid)).compareTo(o.uid);
 	}
 	
-	public String getRatingArray(List<Integer> movieIndex) {
-		double[] rating = new double[movieIndex.size()+1];
+	public String getRatingArray(int moviesSize) {
+		double[] rating = new double[moviesSize+1];
+		
 		StringBuilder sb = new StringBuilder();
-		for(int i=0;i<movieIndex.size();i++) {
-			if(ratings.containsKey(movieIndex.get(i))){
-				sb.append(ratings.get(movieIndex.get(i)).rating);
-			}
-			else sb.append("0.0");
-			sb.append(" ");
+		
+		for(Integer k: ratings.keySet()) {
+			rating[ratings.get(k).m.index] = ratings.get(k).rating;
+		}
+		
+		for(int i=0;i<moviesSize;i++) {
+			sb.append(rating[i] + " ");
 		}
 		sb.append(avRating);
 		
