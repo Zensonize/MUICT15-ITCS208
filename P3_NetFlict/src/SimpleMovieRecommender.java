@@ -1,3 +1,6 @@
+//# Krittamet Kiattukilwattana
+//# 6088063
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -271,6 +274,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	@Override
 	public double predict(Movie m, User u) {
 		// TODO Auto-generated method stub
+		if(!userIndex_Model.containsKey(u.uid)) return u.getMeanRating();
 		int u_idx = userIndex_Model.get(u.uid);
 		int m_idx = movieIndex_Model.get(m.mid);
 		double sumU = 0.0,sumD = 0.0;
