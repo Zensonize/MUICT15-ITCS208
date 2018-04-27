@@ -1,0 +1,16 @@
+java -jar MainController.jar parse small/movies.csv small/users.train.csv
+
+java -jar MainController.jar train micro/movies.csv micro/users.train.csv submit/micro.simple.model
+java -jar MainController.jar train small/movies.csv small/users.train.csv submit/small.simple.model
+java -jar MainController.jar train q1/movies.csv q1/users.train.csv submit/q1.simple.model
+java -jar MainController.jar train q2/movies.csv q2/users.train.csv submit/q2.simple.model
+
+java -jar MainController.jar test micro/movies.csv micro/users.train.csv submit/micro.simple.model micro/users.test.csv submit/micro.simple.result
+java -jar MainController.jar test small/movies.csv small/users.train.csv submit/small.simple.model small/users.test.csv submit/small.simple.result
+java -jar MainController.jar test q1/movies.csv q1/users.train.csv submit/q1.simple.model q1/users.test.csv submit/q1.simple.result
+java -jar MainController.jar test q2/movies.csv q2/users.train.csv submit/q2.simple.model q2/users.test.csv submit/q2.simple.result
+
+
+java -jar MainController.jar recommend small/movies.csv small/users.train.csv small/small.simple.model 19
+java -jar MainController.jar recommend q1/movies.csv q1/users.train.csv submit/q1.simple.model 19
+java -jar MainController.jar recommend q2/movies.csv q2/users.train.csv submit/q2.simple.model 19

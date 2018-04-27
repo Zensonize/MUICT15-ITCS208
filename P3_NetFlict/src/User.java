@@ -5,7 +5,6 @@ import java.util.Map;
 public class User implements Comparable<User>{
 	public int uid = 0;
 	Map<Integer, Rating> ratings = null;		//mapping movieID -> rating
-	double meanRating;
 	
 	public User(int _id)
 	{
@@ -58,24 +57,6 @@ public class User implements Comparable<User>{
 	public int compareTo(User o) {
 		return (new Integer(uid)).compareTo(o.uid);
 	}
+		
 	
-	public void calMeanRating() {
-		meanRating = getMeanRating();
-	}
-	
-	public String getRatingsArray(int size, Map<Integer,Integer> index) {
-		double[] ratingArr = new double[size];
-		
-		for(Integer k: ratings.keySet()) {
-			ratingArr[index.get(ratings.get(k).m.mid)] = ratings.get(k).rating;
-		}
-		
-		StringBuilder rA = new StringBuilder();
-		for(int i=0;i<size-1;i++) {
-			rA.append(ratingArr[i] + " ");
-		}
-		rA.append(meanRating);
-		
-		return rA.toString();
-	}
 }

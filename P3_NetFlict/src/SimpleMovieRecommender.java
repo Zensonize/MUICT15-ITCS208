@@ -21,6 +21,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	Map<Integer,User> users = new HashMap<Integer,User>();
 	Map<Integer,Movie> movies = new HashMap<Integer,Movie>();
 	
+	Map<Integer,Double> userMeanRating = new HashMap<Integer,Double>();
 	//data to build model
 	Map<Integer,Integer> movieIndex = new HashMap<Integer,Integer>(); //MovieID --> index
 	Map<Integer,Integer> userIndex = new HashMap<Integer,Integer>();
@@ -128,7 +129,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		idx = 0;
 		for(Integer K:users.keySet()) {
 			userIndex.put(K, idx++);
-			users.get(K).calMeanRating();
+			userMeanRating.put(K, users.get(K).getMeanRating());
 		}
 	}
 
@@ -169,7 +170,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 			}
 			pw.println("@RATING_MATRIX");
 			for(Integer k:users.keySet()) {
-				pw.println(users.get(k).getRatingsArray(movies.size()+1, movieIndex));
+				pw.println(getRatingsArray(users.get(k),movies.size()+1, movieIndex));
 			}
 			int y=0,x=0;
 			//-----------------------------------------------------------------------------------------------
@@ -288,7 +289,10 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		}
 		
 		if(sumU == 0.0 || sumD == 0.0) return ratings_Model[u_idx][ratings_Model[u_idx].length-1];
-		return ratings_Model[u_idx][ratings_Model[u_idx].length-1] + (sumU/sumD);
+		double toReturn = ratings_Model[u_idx][ratings_Model[u_idx].length-1] + (sumU/sumD);
+		if(toReturn > 5.0) return 5.0;
+		if(toReturn < 0.0) return 0;
+		return toReturn;
 		//use all data from .model //don't fck up
 
 	}
@@ -328,8 +332,8 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 					rV = small.ratings.get(mov).rating;
 					if(rU == 0.0 || rV == 0.0) continue;
 					else {
-						rU -= big.meanRating;
-						rV -= small.meanRating;
+						rU -= userMeanRating.get(big.uid);
+						rV -= userMeanRating.get(small.uid);
 						sumA += rU*rV;
 						sumB += Math.pow(rU, 2);
 						sumC += Math.pow(rV, 2);
@@ -356,5 +360,21 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 	private User getOther(User u, User v){
 		if(u.ratings.size() > v.ratings.size()) return u;
 		return v;
+	}
+	
+	public String getRatingsArray(User u,int size, Map<Integer,Integer> index) {
+		double[] ratingArr = new double[size];
+		
+		for(Integer k: u.ratings.keySet()) {
+			ratingArr[index.get(u.ratings.get(k).m.mid)] = u.ratings.get(k).rating;
+		}
+		
+		StringBuilder rA = new StringBuilder();
+		for(int i=0;i<size-1;i++) {
+			rA.append(ratingArr[i] + " ");
+		}
+		rA.append(u.getMeanRating());
+		
+		return rA.toString();
 	}
 }
