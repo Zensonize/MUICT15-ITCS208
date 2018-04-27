@@ -1,6 +1,4 @@
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Movie {
@@ -8,9 +6,6 @@ public class Movie {
 	public String title = null;
 	public int year = -1;
 	public Set<String> tags = null;
-	public List<User> ratedUser = new ArrayList<User>();
-	public double predicted = 0;
-	public int index;
 	public Movie(int _mid, String _title, int _year)
 	{
 		mid = _mid;
@@ -37,11 +32,4 @@ public class Movie {
 		return "[mid: "+mid+":"+title+" ("+year+") "+tags+"]";
 	}
 	
-	public void addPredicted(double p) {
-		predicted = p;
-	}
-	
-	public void addIndex(int index) {
-		this.index = index;
-	}
 }

@@ -1,17 +1,11 @@
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class User implements Comparable<User>{
 	public int uid = 0;
 	Map<Integer, Rating> ratings = null;		//mapping movieID -> rating
-	Map<Integer, Rating> ratingIndex = new HashMap<Integer, Rating>();
-	double avRating;
-	int index;
+	double meanRating;
 	
 	public User(int _id)
 	{
@@ -59,34 +53,29 @@ public class User implements Comparable<User>{
 		 
 		 return s.toString();
 	}
-
+	
 	@Override
 	public int compareTo(User o) {
 		return (new Integer(uid)).compareTo(o.uid);
 	}
 	
-	public String getRatingArray(int moviesSize) {
-		double[] rating = new double[moviesSize+1];
-		
-		StringBuilder sb = new StringBuilder();
+	public void calMeanRating() {
+		meanRating = getMeanRating();
+	}
+	
+	public String getRatingsArray(int size, Map<Integer,Integer> index) {
+		double[] ratingArr = new double[size];
 		
 		for(Integer k: ratings.keySet()) {
-			rating[ratings.get(k).m.index] = ratings.get(k).rating;
+			ratingArr[index.get(ratings.get(k).m.mid)] = ratings.get(k).rating;
 		}
 		
-		for(int i=0;i<moviesSize;i++) {
-			sb.append(rating[i] + " ");
+		StringBuilder rA = new StringBuilder();
+		for(int i=0;i<size-1;i++) {
+			rA.append(ratingArr[i] + " ");
 		}
-		sb.append(avRating);
+		rA.append(meanRating);
 		
-		return sb.toString();
-	}
-	
-	public void addIndex(int index) {
-		this.index = index;
-	}
-	
-	public void addAveRating(double avRating) {
-		this.avRating = avRating;
+		return rA.toString();
 	}
 }

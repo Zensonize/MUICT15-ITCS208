@@ -2,45 +2,34 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
-import com.google.common.collect.Sets;
-
-import javafx.util.Pair;
-
 public class SimpleMovieRecommender implements BaseMovieRecommender {
 
-	Map<Integer,Movie> movies= new HashMap<Integer, Movie>();
-	Map<Integer,User> users = new HashMap<Integer, User>();
-	Map<Integer,Movie> movieIndex = new HashMap<Integer, Movie>();
-	Map<Integer,User> userIndex = new HashMap<Integer, User>();
-
-//	List<Integer> movieIndex = new ArrayList<Integer>();
-//	List<Integer> userIndex = new ArrayList<Integer>();
-	Map<Integer,List<Integer>> movieClassifiedByYear = new HashMap<Integer,List<Integer>>();
-	double[][] similarOutArray;
+	Map<Integer,User> users = new HashMap<Integer,User>();
+	Map<Integer,Movie> movies = new HashMap<Integer,Movie>();
 	
-	//Data from .model file
-	List<double[]> similarArray_Model = new ArrayList<double[]>();
-	List<double[]> ratingArray_Model = new ArrayList<double[]>();
-	Map<Integer,Integer> movieIndex_model = new HashMap<Integer, Integer>();
-	Map<Integer,Integer> userIndex_model = new HashMap<Integer,Integer>();
-	
+	//data to build model
+	Map<Integer,Integer> movieIndex = new HashMap<Integer,Integer>(); //MovieID --> index
+	Map<Integer,Integer> userIndex = new HashMap<Integer,Integer>();
+	double[][] ratings_out;
+	double[][] similarity_out;
+	//data from model file
+	double[][] ratings_Model;
+	double[][] similarity_Model;
+	Map<Integer,Integer> userIndex_Model = new HashMap<Integer,Integer>();
+	Map<Integer,Integer> movieIndex_Model = new HashMap<Integer,Integer>();
+	//for faster prediction
+	Map<Integer,List<Movie>> movieYearMap = new HashMap<Integer,List<Movie>>();
 	@Override
 	public Map<Integer, Movie> loadMovies(String movieFilename) {
 		Map<Integer, Movie> movieStream = new HashMap<Integer, Movie>();
@@ -54,23 +43,14 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 			   while (it.hasNext()) {
 			     String stream = it.nextLine();
 			     Pattern p = Pattern.compile(regex);
-			     Matcher m = p.matcher(stream);
-			     
+				Matcher m = p.matcher(stream);
 				if(m.find()) {
 					int mid = Integer.parseInt(m.group(1));
 					String title = m.group(3);
 					int year = Integer.parseInt(m.group(4));
 					String[] tags = m.group(6).split("\\|");
 					
-					if(!movieStream.containsKey(mid)) {
-						movieStream.put(mid,new Movie(mid,title,year));
-						if(movieClassifiedByYear.containsKey(year)) movieClassifiedByYear.get(year).add(mid);
-						else{
-							List<Integer> mYear = new ArrayList<Integer>();
-							mYear.add(mid);
-							movieClassifiedByYear.put(year, mYear);
-						}
-					}
+					if(!movieStream.containsKey(mid))movieStream.put(mid,new Movie(mid,title,year));
 					
 					for(String k: tags) {
 						movieStream.get(mid).addTag(k);
@@ -90,7 +70,6 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 
 	@Override
 	public Map<Integer, User> loadUsers(String userFilename) {
-		
 		Map<Integer, User> userStream = new HashMap<Integer, User>();
 		
 		try {
@@ -113,10 +92,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 							
 						 else {
 							 userStream.put(uid, new User(uid));
-							 if(rating>0.0) {
-								 userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
-								 movies.get(mid).ratedUser.add(userStream.get(uid));
-							 }
+							 if(rating>0.0) userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
 						 }
 			    	 } catch(NumberFormatException e) {
 //			    		 e.printStackTrace();
@@ -143,155 +119,148 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		movies = loadMovies(movieFilename);
 		users = loadUsers(userFilename);
 		int idx = 0;
-		
-		for(Integer k:movies.keySet()) {				//generate movie index
-			movieIndex.put(idx, movies.get(k));
-			movies.get(k).addIndex(idx++);
+		for(Integer K:movies.keySet()) {
+			movieIndex.put(K, idx++);
 		}
-		
 		idx = 0;
-		
-		for(Integer k:users.keySet()) {					//generate user index
-			userIndex.put(idx, users.get(k));
-			users.get(k).addIndex(idx++);
-			users.get(k).addAveRating(users.get(k).getMeanRating());
+		for(Integer K:users.keySet()) {
+			userIndex.put(K, idx++);
+			users.get(K).calMeanRating();
 		}
 	}
 
 	@Override
 	public Map<Integer, Movie> getAllMovies() {
-		// TODO Auto-generated method stub
 		return movies;
 	}
 
 	@Override
 	public Map<Integer, User> getAllUsers() {
-		// TODO Auto-generated method stub
 		return users;
 	}
 
 	@Override
 	public void trainModel(String modelFilename) {
 		// TODO Auto-generated method stub
-		
 		try{
 			PrintWriter pw = new PrintWriter(new File(modelFilename));
 			
 			pw.println("@NUM_USERS " + users.size());
-			//----------------------------------------------------------
 			pw.print("@USER_MAP {");
-			StringBuilder um = new StringBuilder();
-			for(int i =0;i<userIndex.size();i++) {
-				um.append(i + "=" + userIndex.get(i).uid);
-				if(i == userIndex.size()-1) um.append("}");
-				else um.append(" ");
+			int idx = 0;
+			for(Integer k:users.keySet()) {
+				pw.print(idx++ + "=" + k);
+				if(idx == users.size()) pw.println("}");
+				else pw.print(", ");
 			}
-			pw.println(um.toString());
-			//----------------------------------------------------------
 			pw.println("@NUM_MOVIES " + movies.size());
-			//----------------------------------------------------------
 			pw.print("@MOVIE_MAP {");
-			StringBuilder mm = new StringBuilder();
-			for(int i =0;i<movieIndex.size();i++) {
-				mm.append(i + "=" + movieIndex.get(i).mid);
-				if(i == movieIndex.size()-1) mm.append("}");
-				else mm.append(" ");
-			}
-			pw.println(mm.toString());
-			//----------------------------------------------------------
+			//-----------------------------------------------------------------------------------------------
 			System.out.println("@@@ Computing user rating matrix");
-			pw.println("@RATING_MATRIX");
-			for(int y = 0;y<userIndex.size();y++) {
-				pw.println(userIndex.get(y).getRatingArray(movieIndex.size()));
-			}
-			//----------------------------------------------------------
-			System.out.println("@@@ Computing user sim matrix");
-			pw.println("@USERSIM_MATRIX");
-			similarOutArray = new double[users.size()][users.size()];
-			for(int y = 0;y<userIndex.size();y++) {
-				for(int x = y;x<userIndex.size();x++) {
-					similarOutArray[y][x] = similarity(userIndex.get(y), userIndex.get(x));
-					similarOutArray[x][y] = similarOutArray[y][x];
-				}
-				
-				for(int x = 0;x<userIndex.size();x++) {
-					pw.print(similarOutArray[y][x] + " ");
-				}
-				pw.println();
-				
-			}
 			
-			//----------------------------------------------------------
+			idx = 0;
+			for(Integer k:movies.keySet()) {
+				pw.print(idx++ + "=" + k);
+				if(idx == movies.size()) pw.println("}");
+				else pw.print(", ");
+			}
+			pw.println("@RATING_MATRIX");
+			for(Integer k:users.keySet()) {
+				pw.println(users.get(k).getRatingsArray(movies.size()+1, movieIndex));
+			}
+			int y=0,x=0;
+			//-----------------------------------------------------------------------------------------------
+			System.out.println("@@@ Computing user sim matrix");
+			similarity_out = new double[users.size()][users.size()];
+			for(Integer Y:users.keySet()) {
+				x=0;
+				for(Integer X:users.keySet()) {
+					if(y<=x) {
+						similarity_out[y][x] = similarity(users.get(Y), users.get(X));
+						similarity_out[x][y] = similarity_out[y][x];
+					}
+					x++;
+				}
+				y++;
+			}
+			pw.println("@USERSIM_MATRIX");
+			for(y = 0;y<similarity_out.length;y++) {
+				for(x = 0;x<similarity_out[y].length-1;x++) {
+					pw.print(similarity_out[y][x] + " ");
+				}
+				pw.println(similarity_out[y][x]);
+			}
+			//-----------------------------------------------------------------------------------------------
 			System.out.println("@@@ Writing out model file");
 			pw.close();
 		} catch (FileNotFoundException e) {
 			
 		}
-		
 	}
 
 	@Override
 	public void loadModel(String modelFilename) {
 		// TODO Auto-generated method stub
+		String stream;
 		try {
 			File model = new File(modelFilename);
 			LineIterator it = FileUtils.lineIterator(model, "UTF-8");
-			
-//			int numUser,numMov;
-			// update movie Index map and user index map
-			
 			try {
-				String stream;
-				while(!(stream = it.nextLine()).contains("@USER_MAP")) {}
-				String[] userIndex = stream.replace("@USER_MAP {", "").trim().split("\\ ");
-				for(int i=0;i<userIndex.length;i++) {
-					Pattern p = Pattern.compile("( ?)(\\d+)=(\\d+)(}?)( ?)");
-					Matcher m = p.matcher(userIndex[i]);
+				int num_user = Integer.parseInt(it.nextLine().replace("@NUM_USERS ", ""));
+				stream = it.nextLine().replace("@USER_MAP {", "");
+				String[] userMap = stream.split("\\, ");
+				for(String idlist:userMap) {
+					Pattern p = Pattern.compile("(\\d+)=(\\d+)(}?)");
+					Matcher m = p.matcher(idlist);
 					if(m.find()) {
-						userIndex_model.put(Integer.parseInt(m.group(3)) , Integer.parseInt(m.group(2)));
+						userIndex_Model.put(Integer.parseInt(m.group(2)), Integer.parseInt(m.group(1)));
 					}
-					
 				}
-				it.nextLine();
-				stream = it.nextLine().replace("@MOVIE_MAP {", "").trim();
-				String[] movieIndex = stream.split("\\ ");
-				for(int i=0;i<movieIndex.length;i++) {
-					Pattern p = Pattern.compile("( ?)(\\d+)=(\\d+)(}?)( ?)");
-					Matcher m = p.matcher(movieIndex[i]);
+				//-----------------------------------------------------------------------------------------------
+				int num_movie = Integer.parseInt(it.nextLine().replace("@NUM_MOVIES ", ""));
+				stream = it.nextLine().replace("@MOVIE_MAP {", "");
+				String[] movieMap = stream.split("\\, ");
+				for(String idlist:movieMap) {
+					Pattern p = Pattern.compile("(\\d+)=(\\d+)(}?)");
+					Matcher m = p.matcher(idlist);
 					if(m.find()) {
-						movieIndex_model.put(Integer.parseInt(m.group(3)) , Integer.parseInt(m.group(2)));
+						int mid = Integer.parseInt(m.group(2));
+						int idx = Integer.parseInt(m.group(1));
+						movieIndex_Model.put(mid,idx);
+						
+						//create a map of list of movie by each year
+						if(movieYearMap.containsKey(movies.get(mid).year)) movieYearMap.get(movies.get(mid).year).add(movies.get(mid));
+						else {
+							List<Movie> aYear = new ArrayList<Movie>();
+							aYear.add(movies.get(mid));
+							movieYearMap.put(movies.get(mid).year,aYear);
+						}
+								
 					}
-					
 				}
-//				stream = it.nextLine();
-//				stream = stream.replace("@MOVIE_MAP {" , "");
-//				stream = stream.replace("}","");
-//				String[] movieIndex = stream.split("\\ ");
-//				for(String k: movieIndex) {
-//					String[] mappu = k.split("\\=");
-//					movieIndex_model.put(Integer.parseInt(mappu[0]) , movies.get(Integer.parseInt(mappu[1])));
-//				}
-				while(!(stream = it.nextLine()).contains("@RATING_MATRIX")) {}
-				while(!(stream = it.nextLine()).contains("@USERSIM_MATRIX")) {
-					String[] rateArr = stream.split("\\ ");
-					double[] rateArrD = new double[rateArr.length];
-					for(int i =0;i<rateArr.length;i++) {
-						rateArrD[i] = Double.parseDouble(rateArr[i]);
+				//-----------------------------------------------------------------------------------------------
+				it.nextLine();										//skip rating_matrix header
+				ratings_Model = new double[num_user][num_movie+1];
+				for(int i = 0;i<num_user;i++) {
+					String[] ratingA = it.nextLine().split("\\ ");
+					for(int x=0;x<ratingA.length;x++) {
+						ratings_Model[i][x] = Double.parseDouble(ratingA[x]);
 					}
-					ratingArray_Model.add(rateArrD);
 				}
-				while(it.hasNext()){
-					stream = it.nextLine();
-					String[] simArr = stream.split("\\ ");
-					double[] simArrD = new double[simArr.length];
-					for(int i =0;i<simArr.length;i++) {
-						simArrD[i] = Double.parseDouble(simArr[i]);
+				//-----------------------------------------------------------------------------------------------
+				it.nextLine();										//skip similarity matrix header
+				similarity_Model = new double[num_user][num_user];
+				for(int i = 0;i<num_user;i++) {
+					String[] simA = it.nextLine().split("\\ ");
+					for(int x=0;x<simA.length;x++) {
+						similarity_Model[i][x] = Double.parseDouble(simA[x]);
 					}
-					similarArray_Model.add(simArrD);
 				}
-			 } finally {
+			} finally {
 			   LineIterator.closeQuietly(it);
-			 }
+			}
+			
+			
 		} catch(FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -301,105 +270,87 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 
 	@Override
 	public double predict(Movie m, User u) {
-
-		double sum_upper = 0.0,sum_lower = 0.0;
-		if(m.ratedUser.isEmpty()) return 0.0;
-		//use info from model file;
-		//past rating similar to given user
-		for(Integer v: userIndex_model.keySet()) {
-			if(v == u.uid) return 0;
-			else {
-				int v_idx = userIndex_model.get(v);
-				int u_idx = userIndex_model.get(u.uid);
-				int m_idx = movieIndex_model.get(m.mid);
-				if(ratingArray_Model.get(v_idx)[m_idx] != 0.0) {
-					double similar = similarArray_Model.get(v_idx)[u_idx];
-					sum_upper += similar * (ratingArray_Model.get(v_idx)[m_idx] - ratingArray_Model.get(v_idx)[ratingArray_Model.get(v_idx).length-1]);
-					sum_lower += Math.abs(similar);
-				}
+		// TODO Auto-generated method stub
+		int u_idx = userIndex_Model.get(u.uid);
+		int m_idx = movieIndex_Model.get(m.mid);
+		double sumU = 0.0,sumD = 0.0;
+		for(int y=0;y<ratings_Model.length;y++) {
+			if(y == u_idx) continue;
+			if(ratings_Model[y][m_idx] > 0.0) {
+					double s = similarity_Model[y][u_idx];
+					sumU += s*(ratings_Model[y][m_idx] - ratings_Model[y][ratings_Model[y].length-1]);
+					sumD += Math.abs(s);
 			}
 		}
-				
-		double res = ratingArray_Model.get(u.index)[ratingArray_Model.get(u.index).length-1] + (sum_upper/sum_lower); //use average rating from training
 		
-		//if(Double.isNaN(res)) return 0.0;
-		return res;
+		if(sumU == 0.0 || sumD == 0.0) return ratings_Model[u_idx][ratings_Model[u_idx].length-1];
+		return ratings_Model[u_idx][ratings_Model[u_idx].length-1] + (sumU/sumD);
+		//use all data from .model //don't fck up
 
 	}
-	
-	public double similarity(User u,User v) {
-		
-		double sumA = 0.0,sumB = 0.0,sumC = 0.0,rU,rV;
-		if(u.uid == v.uid) return 1.0;
-		Set<Integer> mU = u.ratings.keySet();
-		Set<Integer> mV = v.ratings.keySet();
-		Set<Integer> ins = Sets.intersection(mU, mV);
-		
-		for(Integer movU: ins) {
-			if(u.ratings.get(movU).rating == 0 || v.ratings.get(movU).rating == 0) ;
-			else{
-				rU = u.ratings.get(movU).rating - u.avRating;
-				rV = v.ratings.get(movU).rating - v.avRating;
-				sumA += rU*rV;
-				sumB += Math.pow(rU, 2);
-				sumC += Math.pow(rV, 2);
-			}
-			
-		}
-		if(sumB == 0.0 || sumC == 0.0) return 0.0;
-		sumB = Math.sqrt(sumB);
-		sumC = Math.sqrt(sumC);
-		double sim = sumA/(sumB*sumC);
-		if(Double.isNaN(sim)) return 0.0;
-		if(sim > 1.0) 	return 1.0;						//my sim = 1.0000000000000002 --> change to 1.0
-		if(sim < -1.0) 	return -1.0;					//my sim = -1.0000000000000002 --> change to -1.0
-//		if(sim < 0.0 && sim > -0.0009999) {
-//			return 0.0;
-//		}
-//		if(sim > 0.0 && sim < 0.0009999) return 0;
-		
-		
-		return sim;
-	}
-	
+
 	@Override
 	public List<MovieItem> recommend(User u, int fromYear, int toYear, int K) {
-		List<MovieItem> recommendedMov = new ArrayList<MovieItem>();
-		List<MovieItem> toReturn = new ArrayList<MovieItem>();
-		
-		for(int y = fromYear;y<=toYear;y++) {
-			if(movieClassifiedByYear.containsKey(y)) {
-				for(Integer m: movieClassifiedByYear.get(y)) {
-					double predicted_V = predict(movies.get(m), u);
-					recommendedMov.add(new MovieItem(movies.get(m),predicted_V));
+		// TODO Auto-generated method stub
+		List<MovieItem> calculated = new ArrayList<MovieItem>();
+		for(int i = fromYear;i<=toYear;i++) {
+			if(movieYearMap.containsKey(i)) {
+				for(Movie m:movieYearMap.get(i)) {
+					calculated.add(new MovieItem(m, predict(m, u)));
 				}
 			}
 		}
 		
-		Collections.sort(recommendedMov);
+		Collections.sort(calculated);
 		
-		for(int i = 0 ;i<K;i++) {
-			if(i<recommendedMov.size()) {
-				toReturn.add(recommendedMov.get(i));
-			}
+		if(calculated.size() < K) return calculated;
+		
+		List<MovieItem> toReturn = new ArrayList<MovieItem>();
+		for(int i=0;i<K;i++) {
+			toReturn.add(calculated.get(i));
 		}
-		
-//		for(Integer key: movies.keySet()) {
-//			if(movies.get(key).year>= fromYear && movies.get(key).year <= toYear) {
-//				double predicted_V = predict(movies.get(key), u);
-//				recommendedMov.add(new MovieItem(movies.get(key),predicted_V));
-//			}
-//		}
-//		
-//		Collections.sort(recommendedMov);
-//		
-//		for(int i = 0 ;i<K;i++) {
-//			if(i<recommendedMov.size()) {
-//				toReturn.add(recommendedMov.get(i));
-//			}
-//		}
 		return toReturn;
 	}
+
+	public double similarity(User u,User v) {
+		double sumA = 0.0, sumB = 0.0, sumC = 0.0,rU,rV;
+		if(u.uid == v.uid) return 1.0;
+		else {
+			User small = getSmall(u,v);
+			User big = getOther(u,v);
+			for(Integer mov: small.ratings.keySet()) {
+				if(big.ratings.containsKey(mov)) {
+					rU = big.ratings.get(mov).rating;
+					rV = small.ratings.get(mov).rating;
+					if(rU == 0.0 || rV == 0.0) continue;
+					else {
+						rU -= big.meanRating;
+						rV -= small.meanRating;
+						sumA += rU*rV;
+						sumB += Math.pow(rU, 2);
+						sumC += Math.pow(rV, 2);
+					}
+				}
+			}
+			if(sumB == 0.0 || sumC == 0.0) return 0.0;
+			sumB = Math.sqrt(sumB);
+			sumC = Math.sqrt(sumC);
+			double sim = sumA/(sumB*sumC);
+			if(Double.isNaN(sim)) return 0.0;
+			if(sim > 1.0) 	return 1.0;						//my sim = 1.0000000000000002 --> change to 1.0
+			if(sim < -1.0) 	return -1.0;					//my sim = -1.0000000000000002 --> change to -1.0
+			return sim;
+		}
+	}
 	
-	
+	//this method compare size of rating and return the user who has the smallest rating size
+	private User getSmall(User u, User v){
+		if(u.ratings.size() > v.ratings.size()) return v;
+		return u;
+	}
+	//this method return the opposite of getSmall
+	private User getOther(User u, User v){
+		if(u.ratings.size() > v.ratings.size()) return u;
+		return v;
+	}
 }
