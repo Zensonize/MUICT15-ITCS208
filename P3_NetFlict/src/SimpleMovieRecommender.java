@@ -56,7 +56,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 					
 					if(!movieStream.containsKey(mid))movieStream.put(mid,new Movie(mid,title,year));
 					
-					for(String k: tags) {
+					for(String k: tags) {																			// add tags to movie
 						movieStream.get(mid).addTag(k);
 					}
 				}
@@ -90,12 +90,12 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 				    	 double rating = Double.parseDouble(stream[2]);
 				    	 long timestamp = Long.parseLong(stream[3]);
 				    	 
-				    	 if(userStream.containsKey(uid)) {										// If user exist 
+				    	 if(userStream.containsKey(uid)) {															// If user exist just add rating 
 				    		 if(rating>0.0) userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
 						 }
 							
 						 else {
-							 userStream.put(uid, new User(uid));
+							 userStream.put(uid, new User(uid));													// Create new user and add rating
 							 if(rating>0.0) userStream.get(uid).addRating(movies.get(mid), rating, timestamp);
 						 }
 			    	 } catch(NumberFormatException e) {
@@ -293,7 +293,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		if(toReturn > 5.0) return 5.0;
 		if(toReturn < 0.0) return 0;
 		return toReturn;
-		//use all data from .model //don't fck up
+		//use all data from .model 
 
 	}
 
@@ -313,6 +313,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		
 		if(calculated.size() < K) return calculated;
 		
+		//Get top K movies
 		List<MovieItem> toReturn = new ArrayList<MovieItem>();
 		for(int i=0;i<K;i++) {
 			toReturn.add(calculated.get(i));
@@ -324,8 +325,8 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		double sumA = 0.0, sumB = 0.0, sumC = 0.0,rU,rV;
 		if(u.uid == v.uid) return 1.0;
 		else {
-			User small = getSmall(u,v);
-			User big = getOther(u,v);
+			User small = getSmall(u,v);													// User who rated lesser movie
+			User big = getOther(u,v);													// User who rated more movie
 			for(Integer mov: small.ratings.keySet()) {
 				if(big.ratings.containsKey(mov)) {
 					rU = big.ratings.get(mov).rating;
@@ -345,8 +346,8 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 			sumC = Math.sqrt(sumC);
 			double sim = sumA/(sumB*sumC);
 			if(Double.isNaN(sim)) return 0.0;
-			if(sim > 1.0) 	return 1.0;						//my sim = 1.0000000000000002 --> change to 1.0
-			if(sim < -1.0) 	return -1.0;					//my sim = -1.0000000000000002 --> change to -1.0
+			if(sim > 1.0) 	return 1.0;						// fix sim = 1.0000000000000002 --> change to 1.0
+			if(sim < -1.0) 	return -1.0;					// fix sim = -1.0000000000000002 --> change to -1.0
 			return sim;
 		}
 	}
@@ -362,6 +363,7 @@ public class SimpleMovieRecommender implements BaseMovieRecommender {
 		return v;
 	}
 	
+	//This method return string of rating of User u
 	public String getRatingsArray(User u,int size, Map<Integer,Integer> index) {
 		double[] ratingArr = new double[size];
 		
